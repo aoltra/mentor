@@ -55,10 +55,12 @@ def main():
                             auto_reload=True)
     tmpl = loader.load('unit.html')
 
-    for block in enumerate(blocks_l1):
-        print(tmpl.generate(title=block[1].string, lang="es").render('html', doctype='html5'))
-
-
+   # for idx, block in enumerate(blocks_l1, start=0):
+    for idx, block in enumerate(blocks_l1, start=1):
+        filename_unit = directory_target + "/l1_" + str(idx) + "/unit.html"
+        with open(filename_unit, 'w') as file_unit:
+            file_unit.write(tmpl.generate(title=block.string,
+                                          lang="es").render('html', doctype='html5'))
 
     return
 
