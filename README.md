@@ -32,7 +32,7 @@ Donde:
 
 #### Apartados
 
-Mentor genera una estrucutra compuesta por tantas páginas como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacío son descartados.
+Mentor genera una estrucutra compuesta por tantas páginas como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacíos son descartados.
 
 
 ## Plantillas / Templates
@@ -44,28 +44,32 @@ Es posible configurar la presentación del paquete generado mediante el uso plan
 Cada plantilla se define en una carpeta con el nombre de la plantilla. En su interior debe existir:
 
 * un fichero *chapter.html*, que define la plantilla para cada uno de los bloques principales.
-* *[Opcional]* Una carpeta llamada css donde se almacenen los css a aplicar en la plantilla. En ella no se deben incluir los CSS de Bootstrap.
+* *[Opcional]* Una carpeta llamada css donde se almacenen los ficheros CSS a aplicar en la plantilla. En ella no se deben incluir los ficheros CSS de Bootstrap.
 
 ### Variables
+
+Las variables descritas como **.nombre* hacen referencia los elementos que podemos encontrar en cada uno de los elementos de la lista definida previamente
 
 **Generales**
 
 | Variable | Definición           | 
-| :------- | -------------------: | 
-| $title   | título de la unidad  | 
+| :------- | :------------------- | 
+| $title   | Título de la unidad  |
+| $lang    | Idioma del documento |
 
 **Encabezados**
 
 | Variable | Definición           | 
-| :------- | -------------------: | 
-| blocks   | Lista con los bloques de nivel 1 (encabezado 1) de la unidad  | 
-| Cada bloque tiene |    | 
-| .string   | Texto del encabezado de nivel 1 | 
-| .number   | Número de orden del encabezado | 
+| :------- | :------------------- | 
+| blocks   | Lista con los bloques de nivel 1 *(Encabezado 1)* de la unidad  | 
+| *.string   | Texto del encabezado de nivel 1 | 
+| *.number   | Número de orden del encabezado | 
+
+
 
 ## Author / Autor
 
-Alfredo Oltra (Twitter:  [@aoltra](https://twitter.com/aoltra) / [@uhurulabs](https://twitter.com/uhurulabs)
+Alfredo Oltra (Twitter:  [@aoltra](https://twitter.com/aoltra) / [@uhurulabs](https://twitter.com/uhurulabs))
 
 ## Licencia
 	

@@ -17,7 +17,7 @@ import plac
 
 import Uhuru.os_utilities as UH_OSU
 import Uhuru.cli_utilities as UH_CLIU
-import Chapter
+import mentor_classes as mentor
 
 
 def unzip_odt(odt_file):
@@ -62,7 +62,7 @@ def main(filename: 'odt file to convert',
               if block.string)
     for idx, block in enumerate(blocks, start=1):
         os.makedirs(directory_target + "/l1_" + str(idx))
-        blocks_l1.append(Chapter.Chapter(idx, block))
+        blocks_l1.append(mentor.Block(idx, block))
 
     blocks = []
 
