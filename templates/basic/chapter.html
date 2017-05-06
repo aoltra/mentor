@@ -27,9 +27,9 @@
             <div class="collapse navbar-collapse" id="navigation">
                  <ul class="nav navbar-nav">
                     <li class="dropdown">
-                        <a py:if="uts" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apartados<span class="caret"></span></a>
+                        <a py:if="blocks" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apartados<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li py:for="ut in uts"><a href="../l1_${ut.number}/chapter.html">${ut.block.string}</a></li>
+                            <li py:for="bl in blocks"><a href="../l1_${bl.number}/chapter.html">${bl.block.string}</a></li>
                         </ul>
                     </li>
                 </ul>                    

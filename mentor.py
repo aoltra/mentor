@@ -1,5 +1,5 @@
 """
-Conversor de odt a html para incorporarlo en Moodle
+odt to html conversor to use in Moodle
 """
 #
 # Author: Alfredo Oltra
@@ -22,7 +22,7 @@ import Chapter
 
 def unzip_odt(odt_file):
     """
-    unzip de odt file
+    unzip the odt file
     """
     directory_to_extract = os.path.splitext(odt_file)[0]
     directory_to_extract += ".mentor.tmp"
@@ -33,7 +33,7 @@ def unzip_odt(odt_file):
 
 
 def main(filename: 'odt file to convert',
-         force: ('overwrite existing file', 'flag', 'v')):
+         force: ('overwrite existing file', 'flag', 'f')):
     """
     Convert a odt file in HTML educationl package.
     """
@@ -76,7 +76,7 @@ def main(filename: 'odt file to convert',
         with open(filename_unit, 'w') as file_block:
             file_block.write(tmpl.generate(title=block.block.string,
                                            lang="es",
-                                           uts=blocks_l1).render('html', doctype='html5'))
+                                           blocks=blocks_l1).render('html', doctype='html5'))
 
 
     # copy Bootstrap files
