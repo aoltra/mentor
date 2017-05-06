@@ -1,5 +1,5 @@
 """
-OS utilities
+Operative System utilities
 """
 import os
 import shutil
