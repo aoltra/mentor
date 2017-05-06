@@ -1,6 +1,7 @@
 #########
 # Mentor
 #########
+*.odt
 *.tmp/
 *.mentor/
 

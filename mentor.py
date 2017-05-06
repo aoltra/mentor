@@ -34,7 +34,7 @@ def main():
     """
     main function
     """
-    filename = "prueba1.odt"
+    filename = "Unit 11. Computer Networks (I).odt"
     directory_source = unzip_odt(filename)
 
     file = open(directory_source + "/content.xml", 'r')
@@ -44,8 +44,8 @@ def main():
     directory_target = os.path.splitext(filename)[0] + ".mentor"
   #  if not os.path.exists(directory_target):
   #      os.makedirs(directory_target)
-    if os.path.exists(directory_target):
-        shutil.rmtree(directory_target)
+  #  if os.path.exists(directory_target):
+  #      shutil.rmtree(directory_target)
 
     blocks_l1 = []
 
