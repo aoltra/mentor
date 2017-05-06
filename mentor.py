@@ -9,13 +9,14 @@ Conversor de odt a html para incorporarlo en Moodle
 
 import os
 import zipfile
+import shutil
+
 from bs4 import BeautifulSoup
 from genshi.template import TemplateLoader
 
+import Uhuru.os_utilities as UH_OSU
 import Chapter
 
-# a eliminar en un futuro
-import shutil
 
 def unzip_odt(odt_file):
     """
@@ -35,6 +36,7 @@ def main():
     main function
     """
     filename = "Unit 11. Computer Networks (I).odt"
+    #filename = "prueba1.odt"
     directory_source = unzip_odt(filename)
 
     file = open(directory_source + "/content.xml", 'r')
@@ -49,23 +51,33 @@ def main():
 
     blocks_l1 = []
 
-    blocks = doc.findAll('text:h', attrs={"text:outline-level" : "1"})
+    blocks = (block for block in doc.findAll('text:h', attrs={"text:outline-level" : "1"})
+              if block.string)
     for idx, block in enumerate(blocks, start=1):
         os.makedirs(directory_target + "/l1_" + str(idx))
         blocks_l1.append(Chapter.Chapter(idx, block))
 
     blocks = []
 
-    # generating units
+    # generating level 1 blocks
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),
                             auto_reload=True)
     tmpl = loader.load('chapter.html')
 
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
-        with open(filename_unit, 'w') as file_unit:
-            file_unit.write(tmpl.generate(title=block.block.string,
-                                          lang="es", uts=blocks_l1).render('html', doctype='html5'))
+        with open(filename_unit, 'w') as file_block:
+            print(block)
+            file_block.write(tmpl.generate(title=block.block.string,
+                                           lang="es",
+                                           uts=blocks_l1).render('html', doctype='html5'))
+
+
+    # copy Bootstrap files
+    UH_OSU.copytree('./bootstrap', directory_target)
+
+    # copy ccs template files
+    UH_OSU.copytree('./templates/basic/css', directory_target + "/css")
 
     return
 
