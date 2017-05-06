@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="$lang">
+<html lang="$lang" 
+      xmlns:py="http://genshi.edgewall.org/">
 
 <head>
     <meta charset="utf-8"/>
@@ -20,10 +21,10 @@
                     <span class="icon-bar"></span>
                 </button>
                 <li class="dropdown">
-                   <!--  <a pf:if="uts" class="dropdown-toggle" data-toggle="dropdown" href="#">UNIDADES<span class="caret"></span></a>
-                    <ul py:for="link in reversed(links)" class="dropdown-menu">
-                        <li ><a href="../l1_${ut.ordinal}/unit.html">${ut.name}</a></li>
-                    </ul> -->
+                    <a py:if="uts" class="dropdown-toggle" data-toggle="dropdown" href="#">UNIDADES<span class="caret"></span></a>
+                    <ul py:for="ut in uts" class="dropdown-menu">
+                        <li ><a href="../l1_${ut.number}/chapter.html">${ut.block.string}</a></li>
+                    </ul>
                 </li>
             </div>
         </div>
