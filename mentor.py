@@ -32,6 +32,24 @@ def unzip_odt(odt_file):
     return directory_to_extract
 
 
+def create_styles_for_level(level_number, style_list):
+    style_name = "Heading_20_" + str(level_number)
+
+    styles = list((style['style:name'] for style in style_list
+                   if style.get('style:parent-style-name') == style_name))
+
+    styles.append(style_name)
+
+    return styles
+
+def get_level_number(level_style, styles):
+    level_number = list([key for key, value in styles.items() if level_style in value])
+    if not level_number:
+        print("Error 3: Style not found.")
+        exit(-3)
+
+    return int(level_number[0])
+
 def main(filename: 'odt file to convert',
          force: ('overwrite existing file', 'flag', 'f')):
     """
@@ -56,15 +74,38 @@ def main(filename: 'odt file to convert',
 
     os.makedirs(directory_target)
 
+    styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
 
-    blocks = (block for block in doc.findAll('text:h', attrs={"text:outline-level" : "1"})
-              if block.string)
-    for idx, block in enumerate(blocks, start=1):
-        os.makedirs(directory_target + "/l1_" + str(idx))
-        blocks_l1.append(mentor.Block(idx, block))
+    # only styles which style:parent-style-name is Heading_20_1
+    style_list = doc.findAll('style:style')
+    styles["1"] = create_styles_for_level(1, style_list)
+    styles["2"] = create_styles_for_level(2, style_list)
+    styles["3"] = create_styles_for_level(3, style_list)
 
-    blocks = []
+    # getting & classifying all the headers
+    headers = (head for head in doc.findAll('text:h') if head.string)
+    idx = 0
+    for head in enumerate(headers):
+        level_style = head[1]['text:style-name']
+        if level_style in styles["1"]:
+            idx += 1
+            os.makedirs(directory_target + "/l1_" + str(idx))
+            blocks_l1.append(mentor.Block(idx, head[1]))
+        else:
+            try:
+                blocks_l1[-1].sections.append(mentor.Section(int(get_level_number(level_style,
+                                                                                  styles)),
+                                                             head))
+            except IndexError:
+                print("\nError 2: In the document there must be at least one Heading 1 and",
+                      "has to be above the rest of the headings.")
+                exit(-2)
+
+
+    # for block in enumerate(blocks_l1):
+    #     for sec in enumerate(block[1].sections):
+    #         print(sec)
 
     # generating level 1 blocks
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),

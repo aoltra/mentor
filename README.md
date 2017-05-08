@@ -15,7 +15,7 @@ El objetivo simplificar la creación de contenidos en formatos interactivos y f�
 
 ## Ejecución
 
-La ejecucuón de mentor se puede realizar 
+La ejecución de *mentor* se puede realizar 
 
 Desde consola:
 
@@ -30,14 +30,13 @@ Donde:
 
 ## Elementos soportados
 
-#### Apartados
+#### Bloques y apartados
 
-Mentor genera una estrucutra compuesta por tantas páginas como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacíos son descartados.
-
+*Mentor* genera una estructura compuesta por tantas páginas (bloques) como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacíos son descartados. Para que la generación pueda realizarse, es necesario que exista al menos un *Encabezado 1* y que sea el primero de todos lso encabezados (no puede haber ningún encabezado de un nivel inferior por delante en el texto)
 
 ## Plantillas / Templates
 
-Es posible configurar la presentación del paquete generado mediante el uso plantillas desarrolladas en HTML5/JS/CSS. Las plantillas se almacenan en la carpeta *template*
+Es posible configurar la presentación del paquete generado mediante el uso plantillas desarrolladas en HTML5/JS/CSS3. Las plantillas se almacenan en la carpeta *templates*.
 
 ### Como crear una plantilla
 
@@ -64,7 +63,6 @@ Las variables descritas como **.nombre* hacen referencia los elementos que podem
 | blocks   | Lista con los bloques de nivel 1 *(Encabezado 1)* de la unidad  | 
 | *.string   | Texto del encabezado de nivel 1 | 
 | *.number   | Número de orden del encabezado | 
-
 
 
 ## Author / Autor
