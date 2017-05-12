@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="$lang" 
-      xmlns:py="http://genshi.edgewall.org/">
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <head>
     <meta charset="utf-8"/>
@@ -41,7 +42,25 @@
             <h1>$title</h1>
         </div>
     </div>
-    
+
+
+    <div class="container">
+        <div class="col-md-9" role="main">
+            <!-- import content -->
+            <xi:include href="content.html" />
+        </div>
+        <div class="col-md-3" role="complementary">
+        </div>
+    </div>
+
+    <div py:for="con in content">
+    <py:choose>
+        <py:when test="value_of(con.type) == 0">
+            <h1 class="section-header-l1">PEPEP</h1>
+        </py:when>
+    </py:choose>
+</div>
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->

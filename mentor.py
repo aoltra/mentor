@@ -33,6 +33,9 @@ def unzip_odt(odt_file):
 
 
 def create_styles_for_level(level_number, style_list):
+    """
+    Create a list of heading styles
+    """
     style_name = "Heading_20_" + str(level_number)
 
     styles = list((style['style:name'] for style in style_list
@@ -83,29 +86,37 @@ def main(filename: 'odt file to convert',
     styles["2"] = create_styles_for_level(2, style_list)
     styles["3"] = create_styles_for_level(3, style_list)
 
-    # getting & classifying all the headers
-    headers = (head for head in doc.findAll('text:h') if head.string)
-    idx = 0
-    for head in enumerate(headers):
-        level_style = head[1]['text:style-name']
-        if level_style in styles["1"]:
-            idx += 1
-            os.makedirs(directory_target + "/l1_" + str(idx))
-            blocks_l1.append(mentor.Block(idx, head[1]))
-        else:
-            try:
-                blocks_l1[-1].sections.append(mentor.Section(int(get_level_number(level_style,
-                                                                                  styles)),
-                                                             head))
-            except IndexError:
-                print("\nError 2: In the document there must be at least one Heading 1 and",
-                      "has to be above the rest of the headings.")
-                exit(-2)
+    # getting & classifying all the content from the first header level 1
+    office_text = doc.find('office:text')
+    body_text = False
+    idx_block = 0
+    for child in office_text.children:
+        if not body_text and (child.name != "text:h" or not child.string):
+            continue
+        body_text = True
+
+        # headers not empty
+        if child.name == "text:h" and child.string:
+            level_style = child['text:style-name']
+
+            if level_style in styles["1"]:
+                idx_block += 1
+                os.makedirs(directory_target + "/l1_" + str(idx_block))
+                blocks_l1.append(mentor.Block(idx_block, child))
+            else:
+                try:
+                    blocks_l1[-1].content.append(mentor.Header(int(get_level_number(level_style,
+                                                                                    styles)),
+                                                               child.string))
+                except IndexError:
+                    print("\nError 2: In the document there must be at least one Heading 1 and",
+                          "has to be above the rest of the headings.")
+                    exit(-2)
 
 
-    # for block in enumerate(blocks_l1):
-    #     for sec in enumerate(block[1].sections):
-    #         print(sec)
+    for block in enumerate(blocks_l1):
+        for sec in enumerate(block[1].content):
+            print(sec)
 
     # generating level 1 blocks
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),
@@ -117,7 +128,9 @@ def main(filename: 'odt file to convert',
         with open(filename_unit, 'w') as file_block:
             file_block.write(tmpl.generate(title=block.block.string,
                                            lang="es",
-                                           blocks=blocks_l1).render('html', doctype='html5'))
+                                           blocks=blocks_l1,
+                                           content=block.content)
+                             .render('html', doctype='html5'))
 
 
     # copy Bootstrap files
