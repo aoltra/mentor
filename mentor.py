@@ -53,6 +53,22 @@ def get_level_number(level_style, styles):
 
     return int(level_number[0])
 
+def has_string(tag):
+    """
+    Return true if the tag has a string
+    """
+    for child in tag.children:
+        if child.string:
+            return True
+    return False
+
+def get_string_from_tag(tag):
+    string = ""
+    for child in tag.children:
+        if child.string:
+            string += str(child.string)
+    return string
+
 def main(filename: 'odt file to convert',
          force: ('overwrite existing file', 'flag', 'f')):
     """
@@ -96,7 +112,8 @@ def main(filename: 'odt file to convert',
         body_text = True
 
         # headers not empty
-        if child.name == "text:h" and child.string:
+        if child.name == "text:h" and has_string(child):
+            #print(child)
             level_style = child['text:style-name']
 
             if level_style in styles["1"]:
@@ -107,7 +124,7 @@ def main(filename: 'odt file to convert',
                 try:
                     blocks_l1[-1].content.append(mentor.Header(int(get_level_number(level_style,
                                                                                     styles)),
-                                                               child.string))
+                                                               get_string_from_tag(child)))
                 except IndexError:
                     print("\nError 2: In the document there must be at least one Heading 1 and",
                           "has to be above the rest of the headings.")
