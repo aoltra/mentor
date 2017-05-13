@@ -1,7 +1,12 @@
+<?python
+import mentor_genshi_functions as MGF
+?>
 <div xmlns:py="http://genshi.edgewall.org/" py:for="con in content">
     <py:choose>
         <py:when test="con.type == 0">
-            <h1 class="section-header-l1">${con.string}</h1>
+            <!--<py:if test="con."> -->
+            <!-- <h1 class="section-header-l1">${con.string}</h1> -->
+            ${MGF.create_headers_html(con.level,con.string)}
         </py:when>
     </py:choose>
 </div>
