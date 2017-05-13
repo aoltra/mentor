@@ -46,6 +46,9 @@ def create_styles_for_level(level_number, style_list):
     return styles
 
 def get_level_number(level_style, styles):
+    """
+    Return the heading level of the style
+    """
     level_number = list([key for key, value in styles.items() if level_style in value])
     if not level_number:
         print("Error 3: Style not found.")
@@ -63,6 +66,9 @@ def has_string(tag):
     return False
 
 def get_string_from_tag(tag):
+    """
+    Get the string of the tag, joining the strings of its children
+    """
     string = ""
     for child in tag.children:
         if child.string:
@@ -96,13 +102,12 @@ def main(filename: 'odt file to convert',
     styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
 
-    # only styles which style:parent-style-name is Heading_20_1
+    # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
     style_list = doc.findAll('style:style')
-    styles["1"] = create_styles_for_level(1, style_list)
-    styles["2"] = create_styles_for_level(2, style_list)
-    styles["3"] = create_styles_for_level(3, style_list)
+    for heading_level in range(1, 10):
+        styles[str(heading_level)] = create_styles_for_level(heading_level, style_list)
 
-    # getting & classifying all the content from the first header level 1
+    # getting & classifying all the content from the first heading level 1
     office_text = doc.find('office:text')
     body_text = False
     idx_block = 0
@@ -111,7 +116,7 @@ def main(filename: 'odt file to convert',
             continue
         body_text = True
 
-        # headers not empty
+        # headings not empty
         if child.name == "text:h" and has_string(child):
             #print(child)
             level_style = child['text:style-name']
@@ -122,7 +127,7 @@ def main(filename: 'odt file to convert',
                 blocks_l1.append(mentor.Block(idx_block, child))
             else:
                 try:
-                    blocks_l1[-1].content.append(mentor.Header(int(get_level_number(level_style,
+                    blocks_l1[-1].content.append(mentor.Heading(int(get_level_number(level_style,
                                                                                     styles)),
                                                                get_string_from_tag(child)))
                 except IndexError:

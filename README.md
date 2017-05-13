@@ -44,6 +44,13 @@ Cada plantilla se define en una carpeta con el nombre de la plantilla. En su int
 
 * un fichero *chapter.html*, que define la plantilla para cada uno de los bloques principales.
 * *[Opcional]* Una carpeta llamada css donde se almacenen los ficheros CSS a aplicar en la plantilla. En ella no se deben incluir los ficheros CSS de Bootstrap.
+* *[Opcional]* Todos aquellos ficheros .html que se vayan a incluir (con *xi:include*) dentro del fichero *chapter.html*.
+* *[Opcional]* Una carpeta llamada *python* donde se almacenen los ficheros .py que incluyan funciones a utilizar dentro de la plantilla. Estas funciones se importan dentro de la plantilla y se utilizan mediante (NOMPLANTILLA: nombre de la plantilla, NOMFICHERO: nombre del fichero, NOMFUNCION: nombre de la función)
+~~~
+<?python import templates.NOMPLANTILLA.python.NOMFICHERO as MGF ?>
+
+${MGF.NOMFUNCION()}
+~~~
 
 ### Variables
 
@@ -64,6 +71,16 @@ Las variables descritas como **.nombre* hacen referencia los elementos que podem
 | *.string   | Texto del encabezado de nivel 1 | 
 | *.number   | Número de orden del encabezado | 
 
+**Contenido**
+
+| Variable | Definición           | 
+| :------- | :------------------- | 
+| content  | Lista con todos los contenidos ordenados en orden de aparición en el *odt* del bloque | 
+| *.type   | Tipo de contenido | 
+
+| Tipo 0   | Headings    |
+| *.level  | Nivel del encabezado 2..10 | 
+| *.string | Texto del encabezado | 
 
 ## Author / Autor
 

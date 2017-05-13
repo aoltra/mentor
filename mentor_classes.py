@@ -46,7 +46,7 @@ class Content(object):
     def __init__(self, ty):
         """
         type: type of content.
-            0: Header
+            0: Heading
             1: Paragraph
         """
         self.type = ty
@@ -58,8 +58,8 @@ class Content(object):
         return "Type:" + str(self.type)
 
 
-class Header(Content):
-    "Modeling a internal header"
+class Heading(Content):
+    "Modeling a internal heading"
     def __init__(self, level, string):
         """
         level: heading level
@@ -72,7 +72,7 @@ class Header(Content):
         return self.__repr__()
 
     def __repr__(self):
-        return super(Header, self).__repr__() + \
+        return super(Heading, self).__repr__() + \
             " Level:" + str(self.level) + "\nBlock:" + str(self.string)
 
 
