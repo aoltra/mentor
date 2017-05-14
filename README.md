@@ -13,9 +13,27 @@ El objetivo simplificar la creación de contenidos en formatos interactivos y f�
 * *Responsive*. Compatible con dispositivos de diferentes tamaños.
 * Dotarla por defecto de soporte de accesibillidad
 
+## Funcionamiento
+ 
+El creador de contenidos debe trabajar sobre un procesador de textos que soporte de manera nativa el formato odt (OpenOffice o LibreOffice). Para ello debe utilizar la plantilla *mentor.es.ott* o *mentor.en.ott* que se encuentra disponible en la carpeta *ott templates*. Estas plantillas aportan estilos y funcionalidades que permiten la exportación vía *Mentor*. La exportación se encarga de obtener el contenido del documento y crear una colección de páginas web aplicándoles una plantilla HTML/CSS.
+
+Por lo tanto Mentor funciona definiendo un documento pensado para formato papel (al cual le aplica los **estilos ott**) y exportándolo a formato HTML (aplicando **estilos CSS**). 
+
+Lo importante de los estilos que proporciona el ott es el nombre, no como tengan definidas sus caracterísitcas. El usuario es libre de poder asignar a cada uno de los estilos las características que le interesen para que la presentación en papel sea lo más óptima y estética posible. Los estilos aplicados en el paquete HTML generado serán los definidos en la plantilla HTML (ficheros .css) que vaya a utilizar, no los definidos en el .ott.
+
+### Estilos ott
+
+*Mentor* utiliza dos tipos de estilos ott: estilos de serie del procesador (como los Encabezados) y estilos Mentor (que son aquellos que permiten la creación de elementos diferentes, como observaciones).
+
+> Los estilos de *Mentor* empiezan con el prefijo MT
+
+*Mentor* divide el documento en lo que denomina **bloques**, que son todas aquellas partes del documento encabezadas por un *Encabezados 1*. Es, por lo tanto, necesario que exista al menos un *Encabezado 1* en el documento. Además todos aquellos elementos ubicados delante del primer *Encabezado 1* no serán tenidos en cuenta.
+
+En el apartado Elementos soportados se indican todos aquellos *estilos ott* y objetos que están soportados por *Mentor* y que por lo tanto son capaces de generar una salida HTML.
+
 ## Ejecución
 
-La ejecución de *mentor* se puede realizar 
+La ejecución de *Mentor* se puede realizar 
 
 Desde consola:
 
@@ -32,7 +50,17 @@ Donde:
 
 #### Bloques y apartados
 
-*Mentor* genera una estructura compuesta por tantas páginas (bloques) como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacíos son descartados. Para que la generación pueda realizarse, es necesario que exista al menos un *Encabezado 1* y que sea el primero de todos lso encabezados (no puede haber ningún encabezado de un nivel inferior por delante en el texto)
+**Estilos**: Encabezados 1..10
+
+*Mentor* genera una estructura compuesta por tantas páginas (bloques) como encabezados de nivel 1 (*Encabezado 1*) exitan en el documento *odt*. Los párrafos marcados como *Encabezado 1* pero vacíos son descartados. Para que la generación pueda realizarse, es necesario que exista al menos un *Encabezado 1* y que sea el primero de todos los encabezados (no puede haber ningún encabezado de un nivel inferior por delante en el texto).
+
+Los encabezados 2 al 10 también son generados para la creación de secciones o apartados dentro de cada bloque.
+
+#### Observaciones
+
+**Estilos**: MT Observaciones 1..3
+
+Las observaciones pretenden ser textos que muestren al lector información que pueda ser interesante, importante, en la que suele comenter errores, etc. La plantilla ott proporciona tres estilos *MT Observaciones 1..3*. El estilo *MT Observaciones* no debe ser usado ya que únicamente se encuentra definido como estilo vinculado del resto. 
 
 ## Plantillas / Templates
 
@@ -78,9 +106,25 @@ Las variables descritas como **.nombre* hacen referencia los elementos que podem
 | content  | Lista con todos los contenidos ordenados en orden de aparición en el *odt* del bloque | 
 | *.type   | Tipo de contenido | 
 
-| Tipo 0   | Headings    |
+| Tipo 0   | Headings (Encabezados)     |
 | *.level  | Nivel del encabezado 2..10 | 
-| *.string | Texto del encabezado | 
+| *.string | Texto del encabezado       | 
+
+| Tipo 1   | Paragraph (Párrafos)   |
+| *.string | Texto del párrafo      | 
+
+| Tipo 2   | Remarks (Observaciones)    |
+| *.type   | Nivel del encabezado 2..10 | 
+| *.string | Texto de la observación    | 
+
+
+## Documentos odt antiguos
+
+
+
+## Problemas
+
+¡¡No sandbox!!!
 
 ## Author / Autor
 
