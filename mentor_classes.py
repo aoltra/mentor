@@ -63,6 +63,7 @@ class Heading(Content):
     def __init__(self, level, string):
         """
         level: heading level
+        string: text body of the paragraph
         """
         self.level = level
         self.string = string
@@ -78,7 +79,9 @@ class Heading(Content):
 
 class Paragraph(Content):
     "Modeling a paragraph"
-    def __init__(self):
+    def __init__(self, string):
         """
+        string: text body of the paragraph
         """
+        self.string = string
         Content.__init__(self, 1)

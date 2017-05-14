@@ -128,12 +128,20 @@ def main(filename: 'odt file to convert',
             else:
                 try:
                     blocks_l1[-1].content.append(mentor.Heading(int(get_level_number(level_style,
-                                                                                    styles)),
-                                                               get_string_from_tag(child)))
+                                                                                     styles)),
+                                                                get_string_from_tag(child)))
                 except IndexError:
                     print("\nError 2: In the document there must be at least one Heading 1 and",
                           "has to be above the rest of the headings.")
                     exit(-2)
+
+        if child.name == "text:p" and has_string(child):
+            try:
+                blocks_l1[-1].content.append(mentor.Paragraph(get_string_from_tag(child)))
+            except IndexError:
+                print("\nError 4: In the document there must be at least one Heading 1 and",
+                      "has to be above the rest of the content.")
+                exit(-4)
 
 
     for block in enumerate(blocks_l1):

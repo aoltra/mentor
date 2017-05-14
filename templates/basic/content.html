@@ -7,5 +7,9 @@ import templates.basic.python.mentor_genshi_functions as MGF
         <py:when test="con.type == 0">
             ${MGF.create_headers_html(con.level,con.string)}
         </py:when>
+         <!-- paragraph -->
+        <py:when test="con.type == 1">
+            <p>${con.string}</p>
+        </py:when>
     </py:choose>
 </div>
