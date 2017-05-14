@@ -112,7 +112,7 @@ def main(filename: 'odt file to convert',
     body_text = False
     idx_block = 0
     for child in office_text.children:
-        if not body_text and (child.name != "text:h" or not child.string):
+        if not body_text and (child.name != "text:h" or not has_string(child)):
             continue
         body_text = True
 
@@ -144,9 +144,9 @@ def main(filename: 'odt file to convert',
                 exit(-4)
 
 
-    for block in enumerate(blocks_l1):
-        for sec in enumerate(block[1].content):
-            print(sec)
+    # for block in enumerate(blocks_l1):
+    #     for sec in enumerate(block[1].content):
+    #         print(sec)
 
     # generating level 1 blocks
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),
@@ -156,7 +156,7 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
-            file_block.write(tmpl.generate(title=block.block.string,
+            file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,
                                            content=block.content)

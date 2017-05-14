@@ -30,7 +30,7 @@
                     <li class="dropdown">
                         <a py:if="blocks" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apartados<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li py:for="bl in blocks"><a href="../l1_${bl.number}/chapter.html">${bl.block.string}</a></li>
+                            <li py:for="bl in blocks"><a href="../l1_${bl.number}/chapter.html">${bl.get_string()}</a></li>
                         </ul>
                     </li>
                 </ul>                    
@@ -43,7 +43,6 @@
         </div>
     </div>
 
-
     <div class="container">
         <div class="col-md-9" role="main">
             <!-- import content -->
@@ -52,14 +51,6 @@
         <div class="col-md-3" role="complementary">
         </div>
     </div>
-
-    <div py:for="con in content">
-    <py:choose>
-        <py:when test="value_of(con.type) == 0">
-            <h1 class="section-header-l1">PEPEP</h1>
-        </py:when>
-    </py:choose>
-</div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
