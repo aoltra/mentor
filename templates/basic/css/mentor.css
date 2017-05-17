@@ -88,3 +88,23 @@ h1 {
     margin: 40px 0 20px;
     border-bottom: 1px solid #ddd;
 }
+
+.remarks {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+
+.remarks-attention {
+    border-left-color: #ce4844;
+}
+
+.remarks-interesting {
+    border-left-color: #aa6708;
+}
+
+.remarks-important {
+    border-left-color: #1b809e;
+}

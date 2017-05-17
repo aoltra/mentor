@@ -11,5 +11,11 @@ import templates.basic.python.mentor_genshi_functions as MGF
         <py:when test="con.type == 1">
             <p>${con.string}</p>
         </py:when>
+         <!-- remarks -->
+        <py:when test="con.type == 2">
+            <div class="remarks ${MGF.remark_category_class(con.category)}">
+                <p py:for="par in con.paragraphs">${par.string}</p>
+            </div>
+        </py:when>
     </py:choose>
 </div>

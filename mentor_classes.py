@@ -22,7 +22,6 @@ class Block(object):
         """
         Get the string of the heading block
         """
-        print(self.block)
         return get_string_from_tag(self.block)
 
     def __str__(self):
@@ -96,12 +95,16 @@ class Paragraph(Content):
         Content.__init__(self, 1)
 
 
-class Remarks(Content):
-    "Modeling remarks paragraph"
-    def __init__(self, typ, string):
+class Remark(Content):
+    "Modeling remarks element"
+    def __init__(self, category, paragraphs):
         """
         type: type of remarks 1..3
+        paragraphs: list of inner paragraphs of remark
         """
-        self.type = typ
-        self.string = string
+        self.category = category
+        self.paragraphs = []
+        for paragraph in paragraphs:
+            self.paragraphs.append(Paragraph(paragraph.string))
+
         Content.__init__(self, 2)

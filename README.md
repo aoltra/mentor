@@ -106,8 +106,8 @@ Las variables descritas como **.nombre* hacen referencia los elementos que podem
 | Variable | Definición           | 
 | :------- | :------------------- | 
 | blocks   | Lista con los bloques de nivel 1 *(Encabezado 1)* de la unidad  | 
-| *.string   | Texto del encabezado de nivel 1 | 
-| *.number   | Número de orden del encabezado | 
+| *.string | Texto del encabezado de nivel 1 | 
+| *.number | Número de orden del encabezado | 
 
 **Contenido**
 
@@ -118,20 +118,20 @@ Las variables descritas como **.nombre* hacen referencia los elementos que podem
 
 
 | Tipo 0   | Headings (Encabezados)     |
-| :------- | :------------------- | 
+| :------- | :------------------------- | 
 | *.level  | Nivel del encabezado 2..10 | 
 | *.string | Texto del encabezado       | 
 
 
 | Tipo 1   | Paragraph (Párrafos)   |
-| :------- | :------------------- | 
+| :------- | :--------------------- | 
 | *.string | Texto del párrafo      | 
 
 
-| Tipo 2   | Remarks (Observaciones)    |
-| :------- | :------------------- | 
-| *.type   | Nivel del encabezado 2..10 | 
-| *.string | Texto de la observación    | 
+| Tipo 2       | Remarks (Observaciones)             |
+| :----------- | :---------------------------------- | 
+| *.category   | Categoria del estilos asociado 1..3 | 
+| *.paragraphs | Lista con todos los párrafos ordenados en orden de aparición en el remark | 
 
 
 ## Documentos odt antiguos
