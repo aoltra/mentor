@@ -204,9 +204,7 @@ def main(filename: 'odt file to convert',
                         #               "has to be above the rest of the content.")
                         #         exit(-4)
 
-        cokik = mentor.ElementProcessor.process_element(child)
-        if cokik is not None:
-            blocks_l1[-1].content.append(cokik)
+        blocks_l1[-1].content.append(mentor.ElementProcessor.process_element(child))
 
         # elements not included in previous controls
         # Remarks
@@ -230,7 +228,7 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
-           # print(block.content)
+            print(block.content)
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,

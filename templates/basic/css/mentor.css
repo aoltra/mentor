@@ -1,6 +1,6 @@
 /* Mentor.css 
  * Author: Alfredo Oltra
- * Licensed under the Creative Commons Attribution 3.0 Unported License. For
+ * Licensed under the Creative Commons Attribution 3.0 Unported License.
  *
  * Based in Bootstrap Docs (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -10,10 +10,28 @@
 
 body {
     padding-top: 50px;
+    font-size: 16px;
 }
 
 h1 {
     font-size:36px;
+}
+
+.mentor-notsupported {
+    padding: 1em 0;
+    background: #711;
+    color: #edd;
+    border: 1px solid white;
+    border-radius: 0.5em;
+    text-align: center;
+}
+
+.mentor-notsupported-span {
+    background: #711;
+    color: #edd;
+    border: 1px solid white;
+    border-radius: 0.5em;
+    font-size: 0.8em;
 }
 
 .mentor-blocks-nav 
@@ -90,7 +108,9 @@ h1 {
 }
 
 .remarks {
-    padding: 20px;
+    position: relative;
+    left: 5%;
+    padding: 10px;
     margin: 20px 0;
     border: 1px solid #eee;
     border-left-width: 5px;

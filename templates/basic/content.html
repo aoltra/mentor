@@ -5,6 +5,9 @@ import templates.basic.python.mentor_genshi_functions as MGF
      xmlns:xi="http://www.w3.org/2001/XInclude" 
      py:for="con in content">
     <py:choose>
+        <py:when test="con.type == -1">
+            <p class="mentor-notsupported">ELEMENTO NO SOPORTADO</p>
+        </py:when>
         <!-- headers -->
         <py:when test="con.type == 0">
             ${MGF.create_headers_html(con.level,con.string)}

@@ -11,6 +11,7 @@ from mentor import get_string_from_tag
 
 # global variables
 # type elements
+NOSUPPORTED_TYPE = -1
 HEADING_TYPE = 0
 PARAGRAPH_TYPE = 1
 REMARK_TYPE = 2
@@ -37,6 +38,8 @@ class ElementProcessor(object):
                 mentor_object = Remark(element)     ## Remarks
             else:
                 mentor_object = Paragraph(element)  ## Paragraphs
+        else:
+            mentor_object = NoSupport(element)
 
         return mentor_object
 
@@ -244,3 +247,12 @@ class Footnote(Content):
             if child.name == 'text:note-body':
                 self.citation = child.string
 
+
+class NoSupport(Content):
+    "Elements no supported"
+    def __init__(self, element):
+        Content.__init__(self, NOSUPPORTED_TYPE, None)
+        return
+
+    def __str__(self):
+        return "NOT SUPPORTED"
