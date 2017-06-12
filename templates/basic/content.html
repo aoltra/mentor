@@ -1,7 +1,9 @@
 <?python
 import templates.basic.python.mentor_genshi_functions as MGF
 ?>
-<div xmlns:py="http://genshi.edgewall.org/" py:for="con in content">
+<div xmlns:py="http://genshi.edgewall.org/" 
+     xmlns:xi="http://www.w3.org/2001/XInclude" 
+     py:for="con in content">
     <py:choose>
         <!-- headers -->
         <py:when test="con.type == 0">
@@ -9,12 +11,16 @@ import templates.basic.python.mentor_genshi_functions as MGF
         </py:when>
          <!-- paragraph -->
         <py:when test="con.type == 1">
-            <p>${con.string}</p>
+            <p>
+                <py:for each="element in con.elements">
+                    <xi:include href="element.html" />
+                </py:for>
+            </p>
         </py:when>
          <!-- remarks -->
         <py:when test="con.type == 2">
             <div class="remarks ${MGF.remark_category_class(con.category)}">
-                <p py:for="par in con.paragraphs">${par.string}</p>
+                <p py:for="element in con.elements">${element.string}</p>
             </div>
         </py:when>
     </py:choose>

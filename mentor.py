@@ -111,7 +111,7 @@ def process_remarks(paragraphs):
                paragraph_style.startswith(REMARKS_STYLE_NAME_EN):
                 category = int(paragraph_style[paragraph_style.rfind('_')+1:])
                 #print(paragraph_style.rfind('_'))
-                #print(category)
+                #print("CAT: ", category)
                 remark_paragraphs.append(paragraph)
 
     # convert list of lists in list
@@ -194,25 +194,28 @@ def main(filename: 'odt file to convert',
             #               "has to be above the rest of the content.")
             #         exit(-5)
 
-        if child.name == "text:p" and has_string(child):
-            try:
-                blocks_l1[-1].content.append(mentor.Paragraph(get_string_from_tag(child)))
-                continue
-            except IndexError:
-                print("\nError 4:  It is not possible to assign the paragraph to a block.",
-                      "In the document there must be at least one Heading 1 and",
-                      "has to be above the rest of the content.")
-                exit(-4)
+                        # if child.name == "text:p" and has_string(child):
+                        #     try:
+                        #         blocks_l1[-1].content.append(mentor.Paragraph(get_string_from_tag(child)))
+                        #         continue
+                        #     except IndexError:
+                        #         print("\nError 4:  It is not possible to assign the paragraph to a block.",
+                        #               "In the document there must be at least one Heading 1 and",
+                        #               "has to be above the rest of the content.")
+                        #         exit(-4)
+
+        cokik = mentor.ElementProcessor.process_element(child)
+        if cokik is not None:
+            blocks_l1[-1].content.append(cokik)
 
         # elements not included in previous controls
         # Remarks
-        inner_paragraphs = get_inner_paragraphs(child)
-        if inner_paragraphs:
-            #print(inner_paragraphs)
-            category, remark_paragraphs = process_remarks(inner_paragraphs)
-            if remark_paragraphs:
-                blocks_l1[-1].content.append(mentor.Remark(category, remark_paragraphs))
-                continue
+        # inner_paragraphs = get_inner_paragraphs(child)
+        # if inner_paragraphs:
+        #     category, remark_paragraphs = process_remarks(inner_paragraphs)
+        #     if remark_paragraphs:
+        #         blocks_l1[-1].content.append(mentor.Remark(category, remark_paragraphs))
+        #         continue
 
 
     # for block in enumerate(blocks_l1):
@@ -227,6 +230,7 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
+           # print(block.content)
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,
