@@ -1,3 +1,5 @@
+#/usr/bin/python3
+
 """
 Helper classes for mentor
 """
@@ -8,6 +10,7 @@ Helper classes for mentor
 # License GPL-3.0
 
 from mentor import get_string_from_tag
+from Uhuru.data_utilities import Singleton
 
 # global variables
 # type elements
@@ -19,21 +22,59 @@ FOOTNOTE_TYPE = 3
 TEXT_TYPE = 4
 
 # styles
-REMARKS_STYLE_NAME_ES = 'MT_20_Observaciones_20_'
-REMARKS_STYLE_NAME_EN = 'MT_20_Remarks_20_'
+STYLE_NAMES = {
+    HEADING_TYPE: ['Heading_20_'],
+    REMARK_TYPE:  ['MT_20_Observaciones_20_', 'MT_20_Remarks_20_']
+    }
 
-class ElementProcessor(object):
+class ElementProcessor(metaclass=Singleton):
     """
     Manages the process of each element of the document
+    Singleton pattern
     """
+    __style_list = {}
 
-    @staticmethod
-    def process_element(element):
+    def __init__(self, style_list):
+        """
+        Initializes the ElementProcessor object
+        """
+        # styles which style:parent-style-name is style_X where X is in [1..10]
+        # and style is and key of __Style_list dictionary
+        for key in STYLE_NAMES:
+            for style in STYLE_NAMES[key]:
+                for level in range(1, 10):
+                    self.__style_list[style + str(level)] =\
+                            self.__create_styles_for_level(style, level, style_list)
+
+        return
+
+    @classmethod
+    def __create_styles_for_level(cls, style_element, level_number, style_list):
+        """
+        Creates a list of styles for element and level
+        style_element: style of element to search
+        level_number: level of style
+        style_list: source of styles
+        """
+        style_name = style_element + str(level_number)
+
+        styles = list((style['style:name'] for style in style_list
+                       if style.get('style:parent-style-name') == style_name))
+
+        styles.append(style_name)
+
+        return styles
+
+    def process_element(self, element):
         """
         Processes a first level xml element
         """
         mentor_object = None
-        if element.name == 'text:p' and ElementProcessor.has_string(element):
+        # headings not empty
+        if element.name == "text:h" and self.has_string(element):
+            print("")
+        # paragraphs not empty
+        elif element.name == 'text:p' and self.has_string(element):
             if Remark.remark_category(element) > 0:
                 mentor_object = Remark(element)     ## Remarks
             else:
@@ -43,18 +84,18 @@ class ElementProcessor(object):
 
         return mentor_object
 
-    @staticmethod
-    def has_string(tag):
+    @classmethod
+    def has_string(cls, tag):
         """
         Return true if the tag has a string
         """
         for child in tag.children:
             if child.string:
                 return True
+
         return False
 
-    @staticmethod
-    def get_inner_elements(element):
+    def get_inner_elements(self, element):
         """
         Return a list of children elements of content.
         """
@@ -63,10 +104,10 @@ class ElementProcessor(object):
             return elements_list
 
         for child in element.children:
-            if child.name == 'text:note' and ElementProcessor.has_string(child):     ## footnotes
+            if child.name == 'text:note' and self.has_string(child):     ## footnotes
                 elements_list.append(Footnote(child))
                 continue
-            if child.name == 'text:p' and ElementProcessor.has_string(child):       ## paragraphs
+            if child.name == 'text:p' and self.has_string(child):       ## paragraphs
                 elements_list.append(Paragraph(child))
                 continue
 
@@ -127,8 +168,9 @@ class Content(object):
         """
         type: type of content.
         """
+        processor = ElementProcessor(None)
         self.type = ty
-        self.elements = ElementProcessor.get_inner_elements(element)
+        self.elements = processor.get_inner_elements(element)
 
     def __str__(self):
         return self.__repr__()
@@ -166,10 +208,21 @@ class Paragraph(Content):
         """
         element: xml element
         """
+        self.element = element
         Content.__init__(self, PARAGRAPH_TYPE, element)
         print("ELEMENT:", self.elements)
 
         return
+
+    def is_style(self, style_type):
+        "Return true if the paragraph style is one of the style_type"
+        paragraph_style = self.element.get('text:style-name')
+        for key in STYLE_NAMES:
+            if key == style_type:
+                for style in STYLE_NAMES[key]:
+                    if paragraph_style.startswith(style):
+                        return True
+        return False
 
 
 class Remark(Content):
@@ -196,13 +249,12 @@ class Remark(Content):
     @staticmethod
     def remark_category(paragraph):
         """
-        Return the category of the Remark if the paragraph is a Remark (number greater than 1).
+        Return the category of the Remark if the paragraph is a Remark (number greater than 0).
         Otherwise return 0
         """
         category = 0
         paragraph_style = paragraph.get('text:style-name')
-        if paragraph_style.startswith(REMARKS_STYLE_NAME_ES) or\
-           paragraph_style.startswith(REMARKS_STYLE_NAME_EN):
+        if paragraph.is_style(REMARK_TYPE):
             category = int(paragraph_style[paragraph_style.rfind('_')+1:])
 
         return category
@@ -212,7 +264,7 @@ class Remark(Content):
 #####################
 ## INLINE ELEMENTS ##
 #####################
-
+# pylint: disable=too-few-public-methods
 class Text(Content):
     "Simple text model"
     string = ""
@@ -247,7 +299,7 @@ class Footnote(Content):
             if child.name == 'text:note-body':
                 self.citation = child.string
 
-
+# pylint: disable=too-few-public-methods
 class NoSupport(Content):
     "Elements no supported"
     def __init__(self, element):

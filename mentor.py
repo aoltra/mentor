@@ -35,11 +35,11 @@ def unzip_odt(odt_file):
     return directory_to_extract
 
 
-def create_styles_for_level(level_number, style_list):
+def create_styles_for_level(style_element, level_number, style_list):
     """
     Create a list of heading styles
     """
-    style_name = "Heading_20_" + str(level_number)
+    style_name = style_element + str(level_number)
 
     styles = list((style['style:name'] for style in style_list
                    if style.get('style:parent-style-name') == style_name))
@@ -147,15 +147,20 @@ def main(filename: 'odt file to convert',
     styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
 
-    # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
+    # get styles
     style_list = doc.findAll('style:style')
-    for heading_level in range(1, 10):
-        styles[str(heading_level)] = create_styles_for_level(heading_level, style_list)
+    processor = mentor.ElementProcessor(style_list)
+
+    # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
+    #style_list = doc.findAll('style:style')
+    #for heading_level in range(1, 10):
+    #    styles[str(heading_level)] = create_styles_for_level(heading_level, style_list)
 
     # getting & classifying all the content from the first heading level 1
     office_text = doc.find('office:text')
     body_text = False
     idx_block = 0
+
     for child in office_text.children:
         if not body_text and (child.name != "text:h" or not has_string(child)):
             continue
@@ -182,29 +187,14 @@ def main(filename: 'odt file to convert',
                           "has to be above the rest of the headings.")
                     exit(-2)
 
-            # if child_style.startswith(REMARKS_STYLE_NAME_ES) or\
-            #    child_style.startswith(REMARKS_STYLE_NAME_EN):
-            #     try:
-            #         print(child_style)
-            #         print(int(child_style[-child_style.rfind('_'):]))
-            #         blocks_l1[-1].content.append(mentor.Remarks(1, get_string_from_tag(child)))
-            #     except IndexError:
-            #         print("\nError 5: It is not possible to assign the remarks content to a",
-            #               "block. In the document there must be at least one Heading 1 and",
-            #               "has to be above the rest of the content.")
-            #         exit(-5)
 
-                        # if child.name == "text:p" and has_string(child):
-                        #     try:
-                        #         blocks_l1[-1].content.append(mentor.Paragraph(get_string_from_tag(child)))
-                        #         continue
-                        #     except IndexError:
-                        #         print("\nError 4:  It is not possible to assign the paragraph to a block.",
-                        #               "In the document there must be at least one Heading 1 and",
-                        #               "has to be above the rest of the content.")
-                        #         exit(-4)
-
-        blocks_l1[-1].content.append(mentor.ElementProcessor.process_element(child))
+        try:
+            blocks_l1[-1].content.append(processor.process_element(child))
+        except IndexError:
+            print("\nError 4: It is not possible to assign the element to a block.",
+                  "In the document there must be at least one Heading 1 and",
+                  "has to be above the rest of the content.")
+            exit(-4)
 
         # elements not included in previous controls
         # Remarks
