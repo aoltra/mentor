@@ -10,7 +10,7 @@ import templates.basic.python.mentor_genshi_functions as MGF
         </py:when>
         <!-- headers -->
         <py:when test="con.type == 0">
-            ${MGF.create_headers_html(con.level,con.string)}
+            ${MGF.create_headers_html(con.level,con.get_raw_text())}
         </py:when>
          <!-- paragraph -->
         <py:when test="con.type == 1">
@@ -23,7 +23,7 @@ import templates.basic.python.mentor_genshi_functions as MGF
          <!-- remarks -->
         <py:when test="con.type == 2">
             <div class="remarks ${MGF.remark_category_class(con.category)}">
-                <p py:for="element in con.elements">${element.string}</p>
+            <!--    <p py:for="element in con.elements">${element.string}</p> -->
             </div>
         </py:when>
     </py:choose>

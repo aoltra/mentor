@@ -144,12 +144,12 @@ def main(filename: 'odt file to convert',
 
     os.makedirs(directory_target)
 
-    styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
+  ###  styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
 
     # get styles
     style_list = doc.findAll('style:style')
-    processor = mentor.ElementProcessor(style_list)
+    processor = mentor.ElementProcessor(directory_target, style_list)
 
     # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
     #style_list = doc.findAll('style:style')
@@ -159,37 +159,41 @@ def main(filename: 'odt file to convert',
     # getting & classifying all the content from the first heading level 1
     office_text = doc.find('office:text')
     body_text = False
-    idx_block = 0
+  ###  idx_block = 0
 
     for child in office_text.children:
         if not body_text and (child.name != "text:h" or not has_string(child)):
             continue
         body_text = True
-        child_style = child.get('text:style-name')
+    ###    child_style = child.get('text:style-name')
 
         # headings not empty
-        if child.name == "text:h" and has_string(child):
-            #print(child)
+     ###   if child.name == "text:h" and has_string(child):
+     ###       #print(child)
 
-            if child_style in styles["1"]:
-                idx_block += 1
-                os.makedirs(directory_target + "/l1_" + str(idx_block))
-                blocks_l1.append(mentor.Block(idx_block, child))
-                continue
-            else:
-                try:
-                    blocks_l1[-1].content.append(mentor.Heading(int(get_level_number(child_style,
-                                                                                     styles)),
-                                                                get_string_from_tag(child)))
-                    continue
-                except IndexError:
-                    print("\nError 2: In the document there must be at least one Heading 1 and",
-                          "has to be above the rest of the headings.")
-                    exit(-2)
+     ###       if child_style in styles["1"]:
+     ###           idx_block += 1
+     ###           os.makedirs(directory_target + "/l1_" + str(idx_block))
+     ###           blocks_l1.append(mentor.Block(idx_block, child))
+     ###           continue
+     ###       else:
+     ###           try:
+     ###               blocks_l1[-1].content.append(mentor.Heading(int(get_level_number(child_style,
+     ###                                                                                styles)),
+     ###                                                           get_string_from_tag(child)))
+     ###               continue
+     ###           except IndexError:
+     ###               print("\nError 2: In the document there must be at least one Heading 1 and",
+     ###                     "has to be above the rest of the headings.")
+     ###               exit(-2)
 
 
         try:
-            blocks_l1[-1].content.append(processor.process_element(child))
+            element = processor.process_element(child)
+            if isinstance(element, mentor.Block):
+                blocks_l1.append(element)
+            else:
+                blocks_l1[-1].content.append(element)
         except IndexError:
             print("\nError 4: It is not possible to assign the element to a block.",
                   "In the document there must be at least one Heading 1 and",
@@ -218,7 +222,6 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
-            print(block.content)
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,
