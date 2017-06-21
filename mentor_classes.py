@@ -47,10 +47,14 @@ class ElementProcessor(metaclass=Singleton):
         # and style is one key of __style_list dictionary
         for key in STYLE_NAMES:
             ElementProcessor.__style_list[key] = {}
-            for style in STYLE_NAMES[key]:
-                for level in range(1, 10):
-                    ElementProcessor.__style_list[key][level] =\
-                            ElementProcessor.__create_styles_for_level(style, level, style_list)
+            #for level in range(1, 10):
+             #   ElementProcessor.__style_list[key].setdefault(level, [])
+            for level in range(1, 10):
+                lst_tmp = []
+                for style in STYLE_NAMES[key]:
+                    lst_tmp += ElementProcessor.__create_styles_for_level(style, level, style_list)
+
+                ElementProcessor.__style_list[key][level] = lst_tmp
 
         return
 
