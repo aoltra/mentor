@@ -22,6 +22,7 @@ PARAGRAPH_TYPE = 1
 REMARK_TYPE = 2
 FOOTNOTE_TYPE = 3
 TEXT_TYPE = 4
+FOOTNOTE_BODY_TYPE = 5
 
 # styles
 STYLE_NAMES = {
@@ -238,6 +239,8 @@ class Content(object):
 
         if element != None:
             self.element_style = element.get('text:style-name')
+        else:
+            self.element_style = None
 
     def get_raw_text(self):
         """
@@ -376,10 +379,18 @@ class Footnote(Content):
     """
     Footnote model
     """
+    class Body(Content):
+        """
+        Body content of footnote
+        """
+        def __init__(self, element):
+            Content.__init__(self, FOOTNOTE_BODY_TYPE, element)
+            return
+
     def __init__(self, element):
         Content.__init__(self, FOOTNOTE_TYPE, element)
         self.__get_note_components(element)
-
+        print("Creando footnote")
         return
 
     def __get_note_components(self, element):
@@ -390,7 +401,7 @@ class Footnote(Content):
             if child.name == 'text:note-citation':
                 self.citation = child.string
             if child.name == 'text:note-body':
-                self.citation = child.string
+                self.body = Footnote.Body(child)
 
 # pylint: disable=too-few-public-methods
 class NoSupport(Content):
