@@ -179,6 +179,35 @@ class ElementProcessor(metaclass=Singleton):
 
         return elements_list
 
+    @classmethod
+    def get_inner_elements_by_type(cls, element, type_element):
+        """
+        Return a list of children elements of content.
+        """
+        print("---------", element)
+        type_elements_list = []
+        if element is None:
+            return type_elements_list
+
+        if not element.elements:
+            print("vaio")
+
+        for child in element.elements:
+            print("child ", child)
+            if isinstance(child, type_element):
+                print("ENCONTRADO", child.get_raw_text())
+                type_elements_list.append(child)
+
+            print("   >>>>>", type_elements_list)
+            inner_elements = cls.get_inner_elements_by_type(child, type_element)
+            print("innner", inner_elements)
+            for el in inner_elements:
+                type_elements_list.append(el)
+            #type_elements_list.append(inner_elements)
+            print("   <<<<<<")
+
+        return type_elements_list
+
 
 class Block(object):
     """
@@ -257,8 +286,11 @@ class Content(object):
         """
         style_element = element.get('text:style-name')
         for style in STYLE_NAMES[style_type]:
-            if style.startswith(style_element):
-                return True
+            if style_element.startswith(style):
+                if style.endswith('_20_') and style == style_element:  # if style ends with space the style_element have to end with a nunber
+                    return False
+                else:
+                    return True
 
         return False
 

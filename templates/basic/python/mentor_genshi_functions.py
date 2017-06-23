@@ -22,3 +22,4 @@ def remark_category_class(category):
         return 'remarks-important'
 
     return ''
+    

@@ -146,6 +146,7 @@ def main(filename: 'odt file to convert',
 
   ###  styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
+    footnotes = []
 
     # get styles
     style_list = doc.findAll('style:style')
@@ -190,10 +191,17 @@ def main(filename: 'odt file to convert',
 
         try:
             element = processor.process_element(child)
+            print("ELEMENTO: ", element)
             if isinstance(element, mentor.Block):
                 blocks_l1.append(element)
+                footnotes.append([])
             else:
                 blocks_l1[-1].content.append(element)
+                footnotes_elements = processor.get_inner_elements_by_type(element, mentor.Footnote)
+                print("footcompleto" , footnotes_elements)
+                for foot in footnotes_elements:
+                     if foot:
+                        footnotes[-1].append(foot)
         except IndexError:
             print("\nError 4: It is not possible to assign the element to a block.",
                   "In the document there must be at least one Heading 1 and",
@@ -222,10 +230,12 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
+            print("footnotes: ", footnotes[idx-1])
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,
-                                           content=block.content)
+                                           content=block.content,
+                                           footnotes=footnotes[idx-1])
                              .render('html', doctype='html5'))
 
 
