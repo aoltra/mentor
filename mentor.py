@@ -217,6 +217,9 @@ def main(filename: 'odt file to convert',
     # copy ccs template files
     UH_OSU.copytree('./templates/basic/css', directory_target + "/css")
 
+    # copy js template files
+    UH_OSU.copytree('./templates/basic/js', directory_target + "/js")
+
     return
 
 

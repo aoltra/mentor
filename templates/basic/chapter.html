@@ -52,9 +52,16 @@
         </div>
     </div>
 
+    <div style="display:none">
+        <ol id="footnotes">
+            <li py:for="foot in footnotes">${foot.body.get_raw_text()}</li>
+        </ol>
+    </div>
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/footnotes.js"></script>
 </body>
 </html>

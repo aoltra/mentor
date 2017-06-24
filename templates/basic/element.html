@@ -1,9 +1,12 @@
+<?python
+import templates.basic.python.mentor_genshi_functions as MGF
+?>
 <py:choose xmlns:py="http://genshi.edgewall.org/">
     <py:when test="element.type == 4">
         ${element.string}
     </py:when>
     <py:when test="element.type == 3">
-        NOTA AL PIE
+        <a class="footnote-citation">${element.citation}</a> 
     </py:when>
     <py:otherwise>
         <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>

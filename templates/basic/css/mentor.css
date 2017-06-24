@@ -107,6 +107,37 @@ h1 {
     border-bottom: 1px solid #ddd;
 }
 
+.footnote-citation:hover {
+    background-color:#555;
+    border-color:#555;
+    color:#fff !important
+}
+
+.footnote-citation {
+    background-color:#eee;
+    border:1px solid #ccc;
+    display:inline-block;
+    padding:1px 10px 2px;
+    white-space:nowrap;
+
+    line-height:1.15;
+    margin-left:2px;
+}
+
+.footnote-body {
+    background-color: #FCF6CF;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 1em;
+    margin: 0.5em 1em;
+    opacity: 0;
+	-webkit-transition: opacity 0.3s linear;
+	-moz-transition: opacity 0.3s linear;
+	-o-transition: opacity 0.3s linear;
+	-ms-transition: opacity 0.3s linear;
+	transition: opacity 0.3s linear;
+}
+
 .remarks {
     position: relative;
     left: 5%;
