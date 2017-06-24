@@ -184,27 +184,16 @@ class ElementProcessor(metaclass=Singleton):
         """
         Return a list of children elements of content.
         """
-        print("---------", element)
         type_elements_list = []
         if element is None:
             return type_elements_list
 
-        if not element.elements:
-            print("vaio")
-
         for child in element.elements:
-            print("child ", child)
             if isinstance(child, type_element):
-                print("ENCONTRADO", child.get_raw_text())
                 type_elements_list.append(child)
 
-            print("   >>>>>", type_elements_list)
             inner_elements = cls.get_inner_elements_by_type(child, type_element)
-            print("innner", inner_elements)
-            for el in inner_elements:
-                type_elements_list.append(el)
-            #type_elements_list.append(inner_elements)
-            print("   <<<<<<")
+            type_elements_list.extend([el for el in inner_elements if el != []])
 
         return type_elements_list
 
@@ -287,7 +276,8 @@ class Content(object):
         style_element = element.get('text:style-name')
         for style in STYLE_NAMES[style_type]:
             if style_element.startswith(style):
-                if style.endswith('_20_') and style == style_element:  # if style ends with space the style_element have to end with a nunber
+                # if style ends with space the style_element have to end with a nunber
+                if style.endswith('_20_') and style == style_element:
                     return False
                 else:
                     return True
@@ -422,7 +412,6 @@ class Footnote(Content):
     def __init__(self, element):
         Content.__init__(self, FOOTNOTE_TYPE, element)
         self.__get_note_components(element)
-        print("Creando footnote")
         return
 
     def __get_note_components(self, element):

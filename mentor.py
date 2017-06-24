@@ -144,7 +144,6 @@ def main(filename: 'odt file to convert',
 
     os.makedirs(directory_target)
 
-  ###  styles = {"1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[]}
     blocks_l1 = []
     footnotes = []
 
@@ -166,47 +165,21 @@ def main(filename: 'odt file to convert',
         if not body_text and (child.name != "text:h" or not has_string(child)):
             continue
         body_text = True
-    ###    child_style = child.get('text:style-name')
-
-        # headings not empty
-     ###   if child.name == "text:h" and has_string(child):
-     ###       #print(child)
-
-     ###       if child_style in styles["1"]:
-     ###           idx_block += 1
-     ###           os.makedirs(directory_target + "/l1_" + str(idx_block))
-     ###           blocks_l1.append(mentor.Block(idx_block, child))
-     ###           continue
-     ###       else:
-     ###           try:
-     ###               blocks_l1[-1].content.append(mentor.Heading(int(get_level_number(child_style,
-     ###                                                                                styles)),
-     ###                                                           get_string_from_tag(child)))
-     ###               continue
-     ###           except IndexError:
-     ###               print("\nError 2: In the document there must be at least one Heading 1 and",
-     ###                     "has to be above the rest of the headings.")
-     ###               exit(-2)
-
 
         try:
             element = processor.process_element(child)
-            print("ELEMENTO: ", element)
             if isinstance(element, mentor.Block):
                 blocks_l1.append(element)
                 footnotes.append([])
             else:
                 blocks_l1[-1].content.append(element)
                 footnotes_elements = processor.get_inner_elements_by_type(element, mentor.Footnote)
-                print("footcompleto" , footnotes_elements)
-                for foot in footnotes_elements:
-                     if foot:
-                        footnotes[-1].append(foot)
+                footnotes[-1].extend([foot for foot in footnotes_elements if foot != []])
         except IndexError:
-            print("\nError 4: It is not possible to assign the element to a block.",
+            print("\nError 2: It is not possible to assign the element to a block.",
                   "In the document there must be at least one Heading 1 and",
                   "has to be above the rest of the content.")
-            exit(-4)
+            exit(-2)
 
         # elements not included in previous controls
         # Remarks
@@ -230,7 +203,6 @@ def main(filename: 'odt file to convert',
     for idx, block in enumerate(blocks_l1, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
-            print("footnotes: ", footnotes[idx-1])
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
                                            blocks=blocks_l1,
