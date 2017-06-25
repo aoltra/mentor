@@ -23,6 +23,7 @@ REMARK_TYPE = 2
 FOOTNOTE_TYPE = 3
 TEXT_TYPE = 4
 FOOTNOTE_BODY_TYPE = 5
+SPAN_TYPE = 6
 
 # styles
 STYLE_NAMES = {
@@ -76,14 +77,16 @@ class ElementProcessor(metaclass=Singleton):
         styles.append(style_name)
         return styles
 
-    @staticmethod
-    def has_string(tag):
+    @classmethod
+    def has_string(cls, tag):
         """
-        Return true if the tag has a string
+        Return true if the tag has a string. It works in recursive way
         It is a static method because don't needs the object (self)
         """
         for child in tag.children:
             if child.string:
+                return True
+            elif cls.has_string(child) is True:
                 return True
 
         return False
@@ -147,6 +150,7 @@ class ElementProcessor(metaclass=Singleton):
 
         # paragraphs not empty
         elif element.name == 'text:p' and cls.has_string(element):
+            # check the type of paragraph
             if Remark.remark_category(element) > 0:
                 mentor_object = Remark(element)     ## Remarks
             else:
@@ -171,6 +175,9 @@ class ElementProcessor(metaclass=Singleton):
                 continue
             if child.name == 'text:p' and cls.has_string(child):       ## paragraphs
                 elements_list.append(Paragraph(child))
+                continue
+            if child.name == 'text:span' and cls.has_string(child):    ## general inline element
+                elements_list.append(Span(child))
                 continue
 
             if child.string: ## if is not any of the previous types
@@ -336,7 +343,6 @@ class Paragraph(Content):
         """
         self.element = element
         Content.__init__(self, PARAGRAPH_TYPE, element)
-        ### print("ELEMENT:", self.elements)
 
         return
 
@@ -394,6 +400,18 @@ class Text(Content):
         Content.__init__(self, TEXT_TYPE, None)
         self.string = string
 
+        return
+
+
+class Span(Content):
+    """
+    Span element model
+    """
+    def __init__(self, element):
+        """
+        element: span xml element
+        """
+        Content.__init__(self, SPAN_TYPE, element)
         return
 
 
