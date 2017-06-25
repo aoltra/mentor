@@ -2,29 +2,32 @@
 import templates.basic.python.mentor_genshi_functions as MGF
 ?>
 <div xmlns:py="http://genshi.edgewall.org/" 
-     xmlns:xi="http://www.w3.org/2001/XInclude" 
-     py:for="con in content">
-    <py:choose>
-        <py:when test="con.type == -1">
-            <p class="mentor-notsupported">ELEMENTO NO SOPORTADO</p>
-        </py:when>
-        <!-- headers -->
-        <py:when test="con.type == 0">
-            ${MGF.create_headers_html(con.level,con.get_raw_text())}
-        </py:when>
-         <!-- paragraph -->
-        <py:when test="con.type == 1">
-            <p>
-                <py:for each="element in con.elements">
+     xmlns:xi="http://www.w3.org/2001/XInclude" py:strip="">
+    <xi:include href="element.html" />
+    <div py:for="con in content" py:strip="">
+        <py:choose>
+            <py:when test="con.type == -1">
+                <p class="mentor-notsupported">ELEMENTO NO SOPORTADO</p>
+            </py:when>
+            <!-- headers -->
+            <py:when test="con.type == 0">
+                ${MGF.create_headers_html(con.level,con.get_raw_text())}
+            </py:when>
+            <!-- paragraph -->
+            <py:when test="con.type == 1">
+                <p>
+                    <!-- <py:for each="element in con.elements">
                     <xi:include href="element.html" />
-                </py:for>
-            </p>
-        </py:when>
-         <!-- remarks -->
-        <py:when test="con.type == 2">
-            <div class="remarks ${MGF.remark_category_class(con.category)}">
-            <!--    <p py:for="element in con.elements">${element.string}</p> -->
-            </div>
-        </py:when>
-    </py:choose>
+                    </py:for> -->
+                    ${render_elements(con.elements)}
+                </p>
+            </py:when>
+            <!-- remarks -->
+            <py:when test="con.type == 2">
+                <div class="remarks ${MGF.remark_category_class(con.category)}">
+                <!--    <p py:for="element in con.elements">${element.string}</p> -->
+                </div>
+            </py:when>
+        </py:choose>
+    </div>
 </div>

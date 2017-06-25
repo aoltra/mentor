@@ -1,14 +1,21 @@
-<?python
-import templates.basic.python.mentor_genshi_functions as MGF
-?>
-<py:choose xmlns:py="http://genshi.edgewall.org/">
-    <py:when test="element.type == 4">
-        ${element.string}
-    </py:when>
-    <py:when test="element.type == 3">
-        <a class="footnote-citation">${element.citation}</a> 
-    </py:when>
-    <py:otherwise>
-        <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>
-    </py:otherwise>
-</py:choose>
+<div xmlns:py="http://genshi.edgewall.org/" py:def="render_elements(input)" py:strip="">
+    <div py:for="element in input" py:strip="">
+        <py:choose>
+            <py:when test="element.type == 4">
+                ${element.string}
+            </py:when>
+            <py:when test="element.type == 3">
+                <a class="footnote-citation">${element.citation}</a> 
+            </py:when>
+            <py:when test="element.type == 6">
+                <!-- <py:for each="element in element.elements">
+                    <xi:include href="element.html" />
+                </py:for>  -->
+                ${render_elements(element.elements)}
+            </py:when>
+            <py:otherwise>
+                <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>
+            </py:otherwise>
+        </py:choose>
+    </div>
+</div>
