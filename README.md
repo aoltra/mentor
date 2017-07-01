@@ -62,6 +62,12 @@ Los encabezados 2 al 10 también son generados para la creación de secciones o 
 
 Las observaciones pretenden ser textos que muestren al lector información que pueda ser interesante, importante, en la que suele comenter errores, etc. La plantilla ott proporciona tres estilos *MT Observaciones 1..3*. El estilo *MT Observaciones* no debe ser usado ya que únicamente se encuentra definido como estilo vinculado del resto. 
 
+### Notas al pie
+
+**Estilos**: *No es necesario aplicar ningún estilo*
+
+Las notas al pie son indicaciones que el autor o el traductor incluye para aclarar algún aspecto o aportar más información. Para su generación no es necesario el uso de ningún estilo, simplemente elegir la inserción de *nota al pie* desde el procresador de textos.
+
 ## Plantillas / Templates
 
 Es posible configurar la presentación del paquete generado mediante el uso plantillas desarrolladas en HTML5/JS/CSS3. Las plantillas se almacenan en la carpeta *templates*.
@@ -74,64 +80,108 @@ Soporta:
 
 * Encabezados hasta nivel 3.
 * 3 tipos de observaciones.
-
+* Notas al pie.
 
 ### Como crear una plantilla
 
 Cada plantilla se define en una carpeta con el nombre de la plantilla. En su interior debe existir:
 
 * un fichero *chapter.html*, que define la plantilla para cada uno de los bloques principales.
-* *[Opcional]* Una carpeta llamada css donde se almacenen los ficheros CSS a aplicar en la plantilla. En ella no se deben incluir los ficheros CSS de Bootstrap.
+* *[Opcional]* Una carpeta llamada *css* donde se almacenen los ficheros CSS a aplicar en la plantilla. En ella no se deben incluir los ficheros CSS de Bootstrap.
+* *[Opcional]* Una carpeta llamada *js* donde se almacenen los ficheros javascript a aplicar en la plantilla. En ella no se deben incluir los ficheros js de Bootstrap.
 * *[Opcional]* Todos aquellos ficheros .html que se vayan a incluir (con *xi:include*) dentro del fichero *chapter.html*.
 * *[Opcional]* Una carpeta llamada *python* donde se almacenen los ficheros .py que incluyan funciones a utilizar dentro de la plantilla. Estas funciones se importan dentro de la plantilla y se utilizan mediante (NOMPLANTILLA: nombre de la plantilla, NOMFICHERO: nombre del fichero, NOMFUNCION: nombre de la función)
+
 ~~~
 <?python import templates.NOMPLANTILLA.python.NOMFICHERO as MGF ?>
 
 ${MGF.NOMFUNCION()}
 ~~~
 
-### Variables
+Las plantillas son creadas mediante [Genshi](https://genshi.edgewall.org/). La manera de crearlas es totalmente libre, con la única condición de que deber existir un fichero llamado *chapter.html*. 
 
-Las variables descritas como **.nombre* hacen referencia los elementos que podemos encontrar en cada uno de los elementos de la lista definida previamente
+Una recomendación que posibilita la escalabilidad de la plantilla así como la facilidad de adapatación, es la de estructurarla en tres páginas:
+
+* *chapter*. Documento raíz que define las características básicas de la página a generar.
+* *content*. Documento que define los elementos contenedores tipo bloque: párrados, cabeceras, observaciones...
+* *element*. Documento que define los elementos html de tipo __inline__: span,... . 
+
+Cada uno de estos documentos se inserta mediante *xi:include* otros documentos (normalmente en *chapter* se incluye *content* y en este  *element*). Por otra parte, teniendo en cuenta que es habitual que elementos __inline__ contengan otros elementos __inline__, es recomendable que *element* defina una función que pueda ser llamada recursivamente:
+
+~~~
+<div xmlns:py="http://genshi.edgewall.org/" py:def="render_elements(input)" py:strip="">
+    ...
+    ${render_elements(elementos)}        
+    ...
+</div>
+~~~
+
+Por lo demás cada uno de las páginas lo que hace es procesar los diferentes tipos de elementos y aplicarles la estructura y estilos deseados.
+
+### Variables y funciones
+
+Las variables y funciones descritas como **.nombre* hacen referencia los elementos que podemos encontrar en cada uno de los elementos de la lista definida previamente. Por ejemplo, **.number* hace referencia a la variable number de uno de los blocks.
+
+(v): variable, (f): función
 
 **Generales**
 
-| Variable | Definición           | 
-| :------- | :------------------- | 
-| $title   | Título de la unidad  |
-| $lang    | Idioma del documento |
+| Propiedad | Tipo  | Definición           | 
+| :-------- | :---: | :------------------- | 
+| title     |  (v)  | Título de la unidad  |
+| lang      |  (v)  | Idioma del documento |
+| blocks    |  (v)  | Listado de los títulos de los capítulos (encabezados nivel 1) de toda la unidad |
+| content   |  (v)  | Listado del contenido del capítulo que se procesa |
+| footnotes |  (v)  | Listado de notas al pie del capítulo que se procesa |
 
-**Encabezados**
+**Capítulos**
 
-| Variable | Definición           | 
-| :------- | :------------------- | 
-| blocks   | Lista con los bloques de nivel 1 *(Encabezado 1)* de la unidad  | 
-| *.string | Texto del encabezado de nivel 1 | 
-| *.number | Número de orden del encabezado | 
+| Propiedad      | Tipo  | Definición                | 
+| :------------- | :---: |:------------------------ | 
+| blocks         |  (v)  | Lista de los capítulos, es decir los bloques de nivel 1 *(Encabezado 1)*, de la unidad  | 
+| *.number       |  (v)  | Número de orden del capítulo | 
+| *.block        |  (v)  | Contenido xml del encabezado del capítulo | 
+| *.content      |  (v)  | Lista de objetos con el contenido de cada capítulo | 
+| *.get_string() |  (f)  | Devuelve el texto del encabezado | 
 
 **Contenido**
 
-| Variable | Definición           | 
-| :------- | :------------------- | 
-| content  | Lista con todos los contenidos ordenados en orden de aparición en el *odt* del bloque | 
-| *.type   | Tipo de contenido | 
+| Propiedad        | Tipo  | Definición           | 
+| :--------        | :---: | :------------------- | 
+| *.type           |  (v)  | Tipo de contenido | 
+| *.elements       |  (v)  | Lista de elementos hijos | 
+| *.element_style  |  (v)  | Estilo del elemento | 
+| *.get_raw_text() |  (f)  | Devuelve el texto en crudo (son modificaciones de estilo del contenido | 
+  
+| Tipo 0   | Tipo  | Headings (Encabezados)     |
+| :------- | :---: | :------------------------- | 
+| *.level  |  (v)  | Nivel del encabezado 2..10 | 
+  
+| Tipo 1   | Paragraph (Párrafos)      |
+| :------- | :-----------------------  | 
+|          | Sin propiedades añadidas  |  
 
+| Tipo 2   | Remarks (Observaciones)  |
+| :------- | :----------------------- |  
+|          | Sin propiedades añadidas |
 
-| Tipo 0   | Headings (Encabezados)     |
-| :------- | :------------------------- | 
-| *.level  | Nivel del encabezado 2..10 | 
-| *.string | Texto del encabezado       | 
+| Tipo 3       | Tipo  | Footnote (Nota al pie)           |
+| :----------- | :---: | :------------------------------  |  
+| *.citation   |  (v)  | Número de nota al pie            | 
+| *.body       |  (v)  | Elemento body de la nota al pie (tipo 5) | 
+  
+| Tipo 4       | Tipo  | Text (Texto)         |
+| :----------- | :---: | :------------------- | 
+| *.string     |  (v)  | Texto sin formato    | 
+  
+| Tipo 5       | Footnote.Body (Cuerpo de nota al pie)   |
+| :----------- | :-------------------------------------  |  
+|              | Sin propiedades añadidas                |
+  
+| Tipo 6   | Span                     |
+| :------- | :----------------------- | 
+|          | Sin propiedades añadidas |
 
-
-| Tipo 1   | Paragraph (Párrafos)   |
-| :------- | :--------------------- | 
-| *.string | Texto del párrafo      | 
-
-
-| Tipo 2       | Remarks (Observaciones)             |
-| :----------- | :---------------------------------- | 
-| *.category   | Categoria del estilos asociado 1..3 | 
-| *.paragraphs | Lista con todos los párrafos ordenados en orden de aparición en el remark | 
 
 
 ## Documentos odt antiguos
