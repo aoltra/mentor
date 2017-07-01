@@ -221,7 +221,7 @@ class Block(object):
 
     def get_string(self):
         """
-        Get the string of the heading block
+        Get the string of the block
         """
         return get_string_from_tag(self.block)
 
@@ -231,25 +231,6 @@ class Block(object):
     def __repr__(self):
         return "Number:" + str(Block.number) + "\nBlock:" + str(self.block) + \
                "\nSections:\n" + str(self.content)
-
-
-class Section(object):
-    """
-    Section class implementation. Children block elements
-    """
-    def __init__(self, level, block):
-        """
-        level: heading level
-        """
-        self.level = level
-        self.block = block
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "Level:" + str(self.level) + "\nBlock:" + str(self.block)
-
 
 class Content(object):
     """
@@ -278,7 +259,7 @@ class Content(object):
         """
         Return true if the element style is one of the style_type
         element: element to study
-        style_type: style type, HEADING_TYPE, PARAGRAPH_TYPE...
+        style_type: style type, ie, HEADING_TYPE, PARAGRAPH_TYPE...
         """
         style_element = element.get('text:style-name')
         for style in STYLE_NAMES[style_type]:
