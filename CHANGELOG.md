@@ -2,10 +2,10 @@
 
 Formato de numeración de versiones: X.Yt.Z
 
-X: versión mayor
-Y: versión menor
-t: tipo: a (ALFA), b (BETA), r (RELEASE), rc (RELEASE CANDIDATE)
-Z: revisiones, correciones sobre las versión (si no aplica no aparece)
+* X: versión mayor
+* Y: versión menor
+* t: tipo: a (ALFA), b (BETA), r (RELEASE), rc (RELEASE CANDIDATE)
+* Z: revisiones, correciones sobre las versión (si no aplica no aparece)
 
 ## [0.1a]
 ### Añadido

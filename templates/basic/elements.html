@@ -1,17 +1,17 @@
 <div xmlns:py="http://genshi.edgewall.org/" py:def="render_elements(input)" py:strip="">
-    <div py:for="element in input" py:strip="">
+    <div py:for="obj in input" py:strip="">
         <py:choose>
-            <py:when test="element.type == 4">
-                ${element.string}
+            <py:when test="obj.type == 4">
+                ${obj.string}
             </py:when>
-            <py:when test="element.type == 3">
-                <a class="footnote-citation">${element.citation}</a> 
+            <py:when test="obj.type == 3">
+                <a class="footnote-citation">${obj.citation}</a> 
             </py:when>
-            <py:when test="element.type == 6">
+            <py:when test="obj.type == 6">
                 <!-- <py:for each="element in element.elements">
                     <xi:include href="element.html" />
                 </py:for>  -->
-                ${render_elements(element.elements)}
+                ${render_elements(obj.inner_objects)}
             </py:when>
             <py:otherwise>
                 <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>

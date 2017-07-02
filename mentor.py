@@ -59,15 +59,6 @@ def get_level_number(level_style, styles):
 
     return int(level_number[0])
 
-def has_string(tag):
-    """
-    Return true if the tag has a string
-    """
-    for child in tag.children:
-        if child.string:
-            return True
-    return False
-
 def get_string_from_tag(tag):
     """
     Get the string of the tag, joining the strings of its children
@@ -77,21 +68,6 @@ def get_string_from_tag(tag):
         if child.string:
             string += str(child.string)
     return string
-
-def get_inner_paragraphs(tag):
-    """
-    Return a list of children paragraphs of tag.
-    """
-    paragraph_list = []
-    for child in tag.children:
-        if child.name == 'text:p':
-            paragraph_list.append(child)
-        else:
-            inner_paragraphs = get_inner_paragraphs(child)
-            for item in inner_paragraphs:
-                paragraph_list.append(item)
-
-    return paragraph_list
 
 def process_remarks(paragraphs):
     """
@@ -144,7 +120,7 @@ def main(filename: 'odt file to convert',
 
     os.makedirs(directory_target)
 
-    blocks_l1 = []
+    chapters = []
     footnotes = []
 
     # get styles
@@ -162,51 +138,39 @@ def main(filename: 'odt file to convert',
   ###  idx_block = 0
 
     for child in office_text.children:
-        if not body_text and (child.name != "text:h" or not has_string(child)):
+        if not body_text and (child.name != "text:h" or
+                              not mentor.ElementProcessor.has_string(child)):
             continue
         body_text = True
 
         try:
-            element = processor.process_element(child)
-            if isinstance(element, mentor.Block):
-                blocks_l1.append(element)
+            mentor_object = processor.process_element(child)
+            if isinstance(mentor_object, mentor.Chapter):
+                chapters.append(mentor_object)
                 footnotes.append([])
             else:
-                blocks_l1[-1].content.append(element)
-                footnotes_elements = processor.get_inner_elements_by_type(element, mentor.Footnote)
-                footnotes[-1].extend([foot for foot in footnotes_elements if foot != []])
+                chapters[-1].inner_objects.append(mentor_object)
+                footnotes_objects = processor.get_inner_mentor_objects_by_type(
+                    mentor_object, mentor.Footnote)
+                footnotes[-1].extend([foot for foot in footnotes_objects if foot != []])
         except IndexError:
             print("\nError 2: It is not possible to assign the element to a block.",
                   "In the document there must be at least one Heading 1 and",
                   "has to be above the rest of the content.")
             exit(-2)
 
-        # elements not included in previous controls
-        # Remarks
-        # inner_paragraphs = get_inner_paragraphs(child)
-        # if inner_paragraphs:
-        #     category, remark_paragraphs = process_remarks(inner_paragraphs)
-        #     if remark_paragraphs:
-        #         blocks_l1[-1].content.append(mentor.Remark(category, remark_paragraphs))
-        #         continue
-
-
-    # for block in enumerate(blocks_l1):
-    #     for sec in enumerate(block[1].content):
-    #         print(sec)
-
-    # generating level 1 blocks
+    # generating level 1 blocks: chapters
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),
                             auto_reload=True)
     tmpl = loader.load('chapter.html')
 
-    for idx, block in enumerate(blocks_l1, start=1):
+    for idx, block in enumerate(chapters, start=1):
         filename_unit = directory_target + "/l1_" + str(idx) + "/chapter.html"
         with open(filename_unit, 'w') as file_block:
             file_block.write(tmpl.generate(title=block.get_string(),
                                            lang="es",
-                                           blocks=blocks_l1,
-                                           content=block.content,
+                                           chapters=chapters,
+                                           content=block.inner_objects,
                                            footnotes=footnotes[idx-1])
                              .render('html', doctype='html5'))
 

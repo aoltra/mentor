@@ -33,7 +33,7 @@ STYLE_NAMES = {
 
 class ElementProcessor(metaclass=Singleton):
     """
-    Manages the process of each element of the document
+    Manages the process of each xml element (EX) of the document
     Singleton pattern because we need to initialize it
     """
     __style_list = {}
@@ -63,9 +63,9 @@ class ElementProcessor(metaclass=Singleton):
     @staticmethod
     def __create_styles_for_level(style_element, level_number, style_list):
         """
-        Creates a list of styles for element and level.
+        Creates a list of styles for xml element and level.
         It is a static method because don't needs the object (self)
-        style_element: style of element to search
+        style_element: style of xml element to search
         level_number: level of style
         style_list: source of styles
         """
@@ -135,7 +135,9 @@ class ElementProcessor(metaclass=Singleton):
     @classmethod
     def process_element(cls, element):
         """
-        Processes a first level xml element
+        Processes a xml element
+        element: xml element to process
+        return: mentor object
         """
         mentor_object = None
         element_style = element.get('text:style-name')
@@ -143,8 +145,8 @@ class ElementProcessor(metaclass=Singleton):
         # headings not empty
         if element.name == "text:h" and cls.has_string(element):
             style_l1 = cls.__style_list[HEADING_TYPE][1]
-            if element_style in style_l1:  # Block
-                mentor_object = Block(element)
+            if element_style in style_l1:  # Chapter
+                mentor_object = Chapter(element)
             else:
                 mentor_object = Heading(element)
 
@@ -161,61 +163,68 @@ class ElementProcessor(metaclass=Singleton):
         return mentor_object
 
     @classmethod
-    def get_inner_elements(cls, element):
+    def get_inner_mentor_objects(cls, element):
         """
         Return a list of children elements of content.
+        element: xml element
+        return: mentor object list
         """
-        elements_list = []
+        mentor_object_list = []
         if element is None:
-            return elements_list
+            return mentor_object_list
 
         for child in element.children:
             if child.name == 'text:note' and cls.has_string(child):     ## footnotes
-                elements_list.append(Footnote(child))
+                mentor_object_list.append(Footnote(child))
                 continue
             if child.name == 'text:p' and cls.has_string(child):       ## paragraphs
-                elements_list.append(Paragraph(child))
+                mentor_object_list.append(Paragraph(child))
                 continue
             if child.name == 'text:span' and cls.has_string(child):    ## general inline element
-                elements_list.append(Span(child))
+                mentor_object_list.append(Span(child))
                 continue
 
             if child.string: ## if is not any of the previous types
-                elements_list.append(Text(child.string))
+                mentor_object_list.append(Text(child.string))
                 continue
 
-        return elements_list
+        return mentor_object_list
 
+    #pylint: disable-msg=C0103
     @classmethod
-    def get_inner_elements_by_type(cls, element, type_element):
+    def get_inner_mentor_objects_by_type(cls, mentor_object, object_type):
         """
-        Return a list of children elements of content.
+        Return a list of mentor_object, children of a mentor_object and the
+        whose type is object_type
+        mentor_object: mentor object root
+        object_type: type object to compare
+        return: list of mentor objects children of mentor_object whose type is object_type
         """
-        type_elements_list = []
-        if element is None:
-            return type_elements_list
+        mentor_object_list = []
+        if mentor_object is None:
+            return mentor_object_list
 
-        for child in element.elements:
-            if isinstance(child, type_element):
-                type_elements_list.append(child)
+        for child_obj in mentor_object.inner_objects:
+            if isinstance(child_obj, object_type):
+                mentor_object_list.append(child_obj)
 
-            inner_elements = cls.get_inner_elements_by_type(child, type_element)
-            type_elements_list.extend([el for el in inner_elements if el != []])
+            inner_objects = cls.get_inner_mentor_objects_by_type(child_obj, object_type)
+            mentor_object_list.extend([obj for obj in inner_objects if obj != []])
 
-        return type_elements_list
+        return mentor_object_list
 
 
-class Block(object):
+class Chapter(object):
     """
-    Block class implementation
+    Chapter class implementation
     """
     number = 0
 
-    def __init__(self, block):
-        Block.number += 1
-        self.number = Block.number
-        self.block = block
-        self.content = []
+    def __init__(self, element):
+        Chapter.number += 1
+        self.number = Chapter.number
+        self.element = element
+        self.inner_objects = []
 
         os.makedirs(ElementProcessor.get_directory_target() + "/l1_" + str(self.number))
 
@@ -223,14 +232,14 @@ class Block(object):
         """
         Get the string of the block
         """
-        return get_string_from_tag(self.block)
+        return get_string_from_tag(self.element)
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
-        return "Number:" + str(Block.number) + "\nBlock:" + str(self.block) + \
-               "\nSections:\n" + str(self.content)
+        return "Number:" + str(Chapter.number) + "\nBlock:" + str(self.element) + \
+               "\nSections:\n" + str(self.inner_objects)
 
 class Content(object):
     """
@@ -241,7 +250,7 @@ class Content(object):
         type: type of content.
         """
         self.type = ty
-        self.elements = ElementProcessor.get_inner_elements(element)
+        self.inner_objects = ElementProcessor.get_inner_mentor_objects(element)
 
         if element != None:
             self.element_style = element.get('text:style-name')
@@ -257,7 +266,7 @@ class Content(object):
     @staticmethod
     def is_style(element, style_type):
         """
-        Return true if the element style is one of the style_type
+        Returns true if the element style is one of the style_type
         element: element to study
         style_type: style type, ie, HEADING_TYPE, PARAGRAPH_TYPE...
         """
@@ -267,19 +276,24 @@ class Content(object):
                 # if style ends with space the style_element have to end with a nunber
                 if style.endswith('_20_') and style == style_element:
                     return False
-                else:
-                    return True
+
+                return True
 
         return False
 
     @classmethod
-    def __get_inner_text(cls, element):
+    def __get_inner_text(cls, mentor_object):
+        """
+        Private function
+        Return a string with the text of all inner objects of a mentor_objects
+        mentor_object: mentor object
+        """
         string = ""
-        for element_type in element.elements:
-            if isinstance(element_type, Text):
-                string += str(element_type.string)
+        for obj in mentor_object.inner_objects:
+            if isinstance(obj, Text):
+                string += str(obj.string)
             else:
-                string += cls.__get_inner_text(element_type)
+                string += cls.__get_inner_text(obj)
 
         return string
 

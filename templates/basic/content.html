@@ -3,28 +3,28 @@ import templates.basic.python.mentor_genshi_functions as MGF
 ?>
 <div xmlns:py="http://genshi.edgewall.org/" 
      xmlns:xi="http://www.w3.org/2001/XInclude" py:strip="">
-    <xi:include href="element.html" />
-    <div py:for="con in content" py:strip="">
+    <xi:include href="elements.html" />
+    <div py:for="obj in content" py:strip="">
         <py:choose>
-            <py:when test="con.type == -1">
+            <py:when test="obj.type == -1">
                 <p class="mentor-notsupported">ELEMENTO NO SOPORTADO</p>
             </py:when>
             <!-- headers -->
-            <py:when test="con.type == 0">
-                ${MGF.create_headers_html(con.level,con.get_raw_text())}
+            <py:when test="obj.type == 0">
+                ${MGF.create_headers_html(obj.level,obj.get_raw_text())}
             </py:when>
             <!-- paragraph -->
-            <py:when test="con.type == 1">
+            <py:when test="obj.type == 1">
                 <p>
                     <!-- <py:for each="element in con.elements">
                     <xi:include href="element.html" />
                     </py:for> -->
-                    ${render_elements(con.elements)}
+                    ${render_elements(obj.inner_objects)}
                 </p>
             </py:when>
             <!-- remarks -->
-            <py:when test="con.type == 2">
-                <div class="remarks ${MGF.remark_category_class(con.category)}">
+            <py:when test="obj.type == 2">
+                <div class="remarks ${MGF.remark_category_class(obj.category)}">
                 <!--    <p py:for="element in con.elements">${element.string}</p> -->
                 </div>
             </py:when>

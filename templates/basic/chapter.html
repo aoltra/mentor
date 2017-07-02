@@ -28,9 +28,9 @@
             <div class="collapse navbar-collapse" id="navigation">
                  <ul class="nav navbar-nav">
                     <li class="dropdown">
-                        <a py:if="blocks" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apartados<span class="caret"></span></a>
+                        <a py:if="chapters" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Apartados<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li py:for="bl in blocks"><a href="../l1_${bl.number}/chapter.html">${bl.get_string()}</a></li>
+                            <li py:for="bl in chapters"><a href="../l1_${bl.number}/chapter.html">${bl.get_string()}</a></li>
                         </ul>
                     </li>
                 </ul>                    
