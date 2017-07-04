@@ -167,15 +167,13 @@ Las variables y funciones descritas como **.nombre* hacen referencia las propied
 
 **Contenido**
 
-Objeto MentorM: OM_Content
-
 | Propiedad        | Tipo  | Definición           | 
 | :--------        | :---: | :------------------- | 
 | *.type           |  (v)  | Tipo de contenido | 
 | *.elements       |  (v)  | Lista de elementos xml (EX) hijos | 
 | *.element_style  |  (v)  | Estilo del elemento xml (EX) | 
 | *.get_raw_text() |  (f)  | Devuelve el texto en crudo (sin modificaciones de estilo)  del contenido | 
-  
+
 | Tipo 0   | Tipo  | Headings (Encabezados)     |
 | :------- | :---: | :------------------------- | 
 | *.level  |  (v)  | Nivel del encabezado 2..10 | 

@@ -24,6 +24,7 @@ FOOTNOTE_TYPE = 3
 TEXT_TYPE = 4
 FOOTNOTE_BODY_TYPE = 5
 SPAN_TYPE = 6
+LIST_TYPE = 7
 
 # styles
 STYLE_NAMES = {
@@ -37,9 +38,11 @@ class ElementProcessor(metaclass=Singleton):
     Singleton pattern because we need to initialize it
     """
     __style_list = {}
+    __list_style_list = {}
     __directory_target = ""
 
-    def __init__(self, directory_target=None, style_list=None):
+    def __init__(self, directory_target=None, style_list=None,
+                 list_style_list=None):
         """
         Initializes the ElementProcessor object
         """
@@ -58,13 +61,35 @@ class ElementProcessor(metaclass=Singleton):
 
                 ElementProcessor.__style_list[key][level] = lst_tmp
 
+        ElementProcessor.__create_list_style_for_level(list_style_list)
+
+        return
+
+    @classmethod
+    def __create_list_style_for_level(cls, list_style_list):
+        """
+        Fills the __list_style_list with the different list_styles, assign
+        the for each level the type of list: number or bullet
+        """
+        if list_style_list is None:
+            return
+
+        for style in list_style_list:
+            cls.__list_style_list[style['style:name']] = {}
+            level = 0
+            for child in style:
+                level += 1
+                if child.name == "text:list-level-style-number":
+                    cls.__list_style_list[style['style:name']][level] = List.TYPE_NUMBER
+                else:
+                    cls.__list_style_list[style['style:name']][level] = List.TYPE_BULLET
         return
 
     @staticmethod
     def __create_styles_for_level(style_element, level_number, style_list):
         """
         Creates a list of styles for xml element and level.
-        It is a static method because don't needs the object (self)
+        It is a static method because doesn't need the object (self)
         style_element: style of xml element to search
         level_number: level of style
         style_list: source of styles
@@ -157,6 +182,10 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object = Remark(element)     ## Remarks
             else:
                 mentor_object = Paragraph(element)  ## Paragraphs
+
+         # lists not empty
+      #  elif element.name == 'text:list' and cls.has_string(element):
+       #     pass
         else:
             mentor_object = NoSupport(element)
 
@@ -341,6 +370,16 @@ class Paragraph(Content):
 
         return
 
+class List(Content):
+    """
+    List model
+    """
+    TYPE_BULLET = 1
+    TYPE_NUMBER = 2
+
+    def __init__(self, element):
+        Content.__init__(self, LIST_TYPE, element)
+        return
 
 class Remark(Content):
     """

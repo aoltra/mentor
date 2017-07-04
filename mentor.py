@@ -125,7 +125,8 @@ def main(filename: 'odt file to convert',
 
     # get styles
     style_list = doc.findAll('style:style')
-    processor = mentor.ElementProcessor(directory_target, style_list)
+    list_style_list = doc.findAll('text:list-style')
+    processor = mentor.ElementProcessor(directory_target, style_list, list_style_list)
 
     # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
     #style_list = doc.findAll('style:style')
