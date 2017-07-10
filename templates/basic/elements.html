@@ -1,6 +1,12 @@
 <div xmlns:py="http://genshi.edgewall.org/" py:def="render_elements(input)" py:strip="">
     <div py:for="obj in input" py:strip="">
         <py:choose>
+             <!-- paragraph -->
+            <py:when test="obj.type == 1">
+                <p>
+                    ${render_elements(obj.inner_objects)}
+                </p>
+            </py:when>
             <py:when test="obj.type == 4">
                 ${obj.string}
             </py:when>
@@ -12,6 +18,11 @@
                     <xi:include href="element.html" />
                 </py:for>  -->
                 ${render_elements(obj.inner_objects)}
+            </py:when>
+             <py:when test="obj.type == 8">
+                <li>
+                ${render_elements(obj.inner_objects)}
+                </li>
             </py:when>
             <py:otherwise>
                 <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>

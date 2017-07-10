@@ -25,6 +25,7 @@ TEXT_TYPE = 4
 FOOTNOTE_BODY_TYPE = 5
 SPAN_TYPE = 6
 LIST_TYPE = 7
+LIST_ITEM_TYPE = 8
 
 # styles
 STYLE_NAMES = {
@@ -124,6 +125,17 @@ class ElementProcessor(metaclass=Singleton):
         return cls.__directory_target
 
     @classmethod
+    def get_type_list(cls, style, lvl):
+        """
+        Return the type list for a style and a level
+        """
+        print(style, "   ", lvl)
+        try:
+            return cls.__list_style_list[style][lvl]
+        except KeyError: # by default bullet type
+            return List.TYPE_BULLET
+
+    @classmethod
     def get_level_number(cls, input_style, style_type=None):
         """
         Return the level of the style
@@ -184,18 +196,20 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object = Paragraph(element)  ## Paragraphs
 
          # lists not empty
-      #  elif element.name == 'text:list' and cls.has_string(element):
-       #     pass
+        elif element.name == 'text:list' and cls.has_string(element):
+            print("Lista1")
+            mentor_object = List(element)
         else:
             mentor_object = NoSupport(element)
 
         return mentor_object
 
     @classmethod
-    def get_inner_mentor_objects(cls, element):
+    def get_inner_mentor_objects(cls, element, parent=None):
         """
         Return a list of children elements of content.
         element: xml element
+        parent: mentor object parent
         return: mentor object list
         """
         mentor_object_list = []
@@ -204,13 +218,21 @@ class ElementProcessor(metaclass=Singleton):
 
         for child in element.children:
             if child.name == 'text:note' and cls.has_string(child):     ## footnotes
-                mentor_object_list.append(Footnote(child))
+                mentor_object_list.append(Footnote(child, parent))
                 continue
             if child.name == 'text:p' and cls.has_string(child):       ## paragraphs
-                mentor_object_list.append(Paragraph(child))
+                mentor_object_list.append(Paragraph(child, parent))
                 continue
             if child.name == 'text:span' and cls.has_string(child):    ## general inline element
-                mentor_object_list.append(Span(child))
+                mentor_object_list.append(Span(child, parent))
+                continue
+            if child.name == 'text:list-item' and cls.has_string(child):    ## list-items
+                #print("ppaapappapa >>", parent)
+                mentor_object_list.append(List.Item(child, parent))
+                continue
+            if child.name == 'text:list' and cls.has_string(child):    ## list
+                #print(">>>>>> ", parent, " <<<<< ", parent.parent)
+                mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
 
             if child.string: ## if is not any of the previous types
@@ -274,17 +296,20 @@ class Content(object):
     """
     General content. Parent class of the different types of Content
     """
-    def __init__(self, ty, element):
+    def __init__(self, ty, element, parent=None, style=None):
         """
         type: type of content.
         """
         self.type = ty
-        self.inner_objects = ElementProcessor.get_inner_mentor_objects(element)
+        self.parent = parent
 
-        if element != None:
+        if style is None and element != None:
             self.element_style = element.get('text:style-name')
         else:
-            self.element_style = None
+            self.element_style = style
+
+        self.inner_objects = ElementProcessor.get_inner_mentor_objects(element, self)
+
 
     def get_raw_text(self):
         """
@@ -341,19 +366,19 @@ class Heading(Content):
     """
     Internal heading model
     """
-    def __init__(self, element):
+    def __init__(self, element, parent=None):
         """
         level: heading level
         string: text body of the paragraph
         """
-        Content.__init__(self, HEADING_TYPE, element)
+        Content.__init__(self, HEADING_TYPE, element, parent)
         self.level = ElementProcessor.get_level_number(self.element_style)
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
-        return super(Heading, self).__repr__() + \
+        return super().__repr__() + \
             " Level:" + str(self.level) + "\nBlock:" + str(self.get_raw_text())
 
 
@@ -361,12 +386,12 @@ class Paragraph(Content):
     """
     Paragraph model
     """
-    def __init__(self, element):
+    def __init__(self, element, parent=None):
         """
         element: xml element
         """
         self.element = element
-        Content.__init__(self, PARAGRAPH_TYPE, element)
+        Content.__init__(self, PARAGRAPH_TYPE, element, parent)
 
         return
 
@@ -374,25 +399,57 @@ class List(Content):
     """
     List model
     """
+    TYPE_NOT_ASSIGNED = 0
     TYPE_BULLET = 1
     TYPE_NUMBER = 2
 
-    def __init__(self, element):
-        Content.__init__(self, LIST_TYPE, element)
+    class Item(Content):
+        """
+        List Item model
+        """
+        def __init__(self, element, parent):
+            #print("PPPAAA > ", parent)
+            Content.__init__(self, LIST_ITEM_TYPE, element, parent, parent.element_style)
+            return
+
+        def __str__(self):
+            return self.__repr__()
+
+        def __repr__(self):
+            return "List.Item -> " + super().__repr__() + "\n" +\
+                   "              Parent:" + str(self.parent)
+
+    def __init__(self, element, parent=None, level=1):
+        self.level = level
+        self.kind = List.TYPE_NOT_ASSIGNED
+        if parent is None:
+            style = None
+        else:
+            style = parent.element_style
+        Content.__init__(self, LIST_TYPE, element, parent, style)
+        self.kind = ElementProcessor.get_type_list(self.element_style, self.level)
         return
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "List -> " + super().__repr__() + "\n" +\
+               "         Level:" + str(self.level) + "\n" +\
+               "         Kind: " + str(self.kind)
 
 class Remark(Content):
     """
     Remark element model
     """
-    def __init__(self, element, category=0):
+    def __init__(self, element, parent=None, category=0):
         """
         element: xml element
         category: type of remarks 1..3
         """
         self.category = category
 
-        Content.__init__(self, REMARK_TYPE, element)
+        Content.__init__(self, REMARK_TYPE, element, parent)
 
         if category != 0:
             self.category = self.remark_category(element)
@@ -427,11 +484,11 @@ class Text(Content):
     """
     Simple text model
     """
-    def __init__(self, string):
+    def __init__(self, string, parent=None):
         """
         string: body text
         """
-        Content.__init__(self, TEXT_TYPE, None)
+        Content.__init__(self, TEXT_TYPE, None, parent)
         self.string = string
 
         return
@@ -441,11 +498,11 @@ class Span(Content):
     """
     Span element model
     """
-    def __init__(self, element):
+    def __init__(self, element, parent=None):
         """
         element: span xml element
         """
-        Content.__init__(self, SPAN_TYPE, element)
+        Content.__init__(self, SPAN_TYPE, element, parent)
         return
 
 
@@ -457,11 +514,11 @@ class Footnote(Content):
         """
         Body content of footnote
         """
-        def __init__(self, element):
-            Content.__init__(self, FOOTNOTE_BODY_TYPE, element)
+        def __init__(self, element, parent=None):
+            Content.__init__(self, FOOTNOTE_BODY_TYPE, element, parent)
             return
 
-    def __init__(self, element):
+    def __init__(self, element, parent=None):
         Content.__init__(self, FOOTNOTE_TYPE, element)
         self.__get_note_components(element)
         return
@@ -481,8 +538,8 @@ class NoSupport(Content):
     """
     Elements no supported
     """
-    def __init__(self, element):
-        Content.__init__(self, NOSUPPORTED_TYPE, None)
+    def __init__(self, element, parent=None):
+        Content.__init__(self, NOSUPPORTED_TYPE, None, parent)
         return
 
     def __str__(self):
