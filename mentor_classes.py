@@ -26,6 +26,7 @@ FOOTNOTE_BODY_TYPE = 5
 SPAN_TYPE = 6
 LIST_TYPE = 7
 LIST_ITEM_TYPE = 8
+LIST_PARAGRAPH_TYPE = 9
 
 # styles
 STYLE_NAMES = {
@@ -38,8 +39,10 @@ class ElementProcessor(metaclass=Singleton):
     Manages the process of each xml element (EX) of the document
     Singleton pattern because we need to initialize it
     """
-    __style_list = {}
+    __elements_with_levels_style_list = {}
     __list_style_list = {}
+    __general_style_list = {}
+    __previous_mentor_object = None
     __directory_target = ""
 
     def __init__(self, directory_target=None, style_list=None,
@@ -50,19 +53,35 @@ class ElementProcessor(metaclass=Singleton):
         ElementProcessor.__directory_target = directory_target
 
         # styles which style:parent-style-name is style_X where X is in [1..10]
-        # and style is one key of __style_list dictionary
+        # and style is one key of __elements_with_levels_style_list dictionary
         for key in STYLE_NAMES:
-            ElementProcessor.__style_list[key] = {}
-            #for level in range(1, 10):
-             #   ElementProcessor.__style_list[key].setdefault(level, [])
+            ElementProcessor.__elements_with_levels_style_list[key] = {}
             for level in range(1, 10):
                 lst_tmp = []
                 for style in STYLE_NAMES[key]:
                     lst_tmp += ElementProcessor.__create_styles_for_level(style, level, style_list)
 
-                ElementProcessor.__style_list[key][level] = lst_tmp
+                ElementProcessor.__elements_with_levels_style_list[key][level] = lst_tmp
 
         ElementProcessor.__create_list_style_for_level(list_style_list)
+        ElementProcessor.__create_general_styles(style_list)
+
+        return
+
+    @classmethod
+    def __create_general_styles(cls, style_list):
+        """
+        Fills the __general_style_list with the different styles
+        """
+        if style_list is None:
+            return
+
+        for style in style_list:
+            style_data = {}
+   
+            paragraph_properties = style.findChild('style:paragraph-properties')
+            if paragraph_properties and paragraph_properties.has_attr('fo:margin-left'):
+                style_data['margin-left'] = paragraph_properties['fo:margin-left']
 
         return
 
@@ -71,6 +90,7 @@ class ElementProcessor(metaclass=Singleton):
         """
         Fills the __list_style_list with the different list_styles, assign
         the for each level the type of list: number or bullet
+        Each entry has a dictionary with the keys: kind, margin-left
         """
         if list_style_list is None:
             return
@@ -79,11 +99,19 @@ class ElementProcessor(metaclass=Singleton):
             cls.__list_style_list[style['style:name']] = {}
             level = 0
             for child in style:
+                style_data = {}
                 level += 1
                 if child.name == "text:list-level-style-number":
-                    cls.__list_style_list[style['style:name']][level] = List.TYPE_NUMBER
+                    style_data['kind'] = List.TYPE_NUMBER
                 else:
-                    cls.__list_style_list[style['style:name']][level] = List.TYPE_BULLET
+                    style_data['kind'] = List.TYPE_BULLET
+
+                child_l3 = child.findChild().findChild()
+                style_data['margin-left'] = child_l3['fo:margin-left']
+
+
+            cls.__list_style_list[style['style:name']][level] = style_data
+
         return
 
     @staticmethod
@@ -141,7 +169,7 @@ class ElementProcessor(metaclass=Singleton):
         Return the level of the style
         """
         if style_type is None:
-            for key_style in cls.__style_list.keys():
+            for key_style in cls.__elements_with_levels_style_list.keys():
                 level_number = cls.__chek_style_in_style_list(key_style, input_style)
                 if level_number != -1:
                     break
@@ -162,7 +190,7 @@ class ElementProcessor(metaclass=Singleton):
         """
         level_number = -1
 
-        for key, value in cls.__style_list[style_type].items():
+        for key, value in cls.__elements_with_levels_style_list[style_type].items():
             if input_style in value:
                 level_number = key
                 break
@@ -181,7 +209,7 @@ class ElementProcessor(metaclass=Singleton):
 
         # headings not empty
         if element.name == "text:h" and cls.has_string(element):
-            style_l1 = cls.__style_list[HEADING_TYPE][1]
+            style_l1 = cls.__elements_with_levels_style_list[HEADING_TYPE][1]
             if element_style in style_l1:  # Chapter
                 mentor_object = Chapter(element)
             else:
@@ -192,16 +220,18 @@ class ElementProcessor(metaclass=Singleton):
             # check the type of paragraph
             if Remark.remark_category(element) > 0:
                 mentor_object = Remark(element)     ## Remarks
+            elif cls.__previous_mentor_object and isinstance(cls.__previous_mentor_object, Content) and cls.__previous_mentor_object.type == LIST_TYPE:
+                mentor_object = ListParagraph(element)  ## Inner paragraph list
             else:
                 mentor_object = Paragraph(element)  ## Paragraphs
 
          # lists not empty
         elif element.name == 'text:list' and cls.has_string(element):
-            print("Lista1")
             mentor_object = List(element)
         else:
             mentor_object = NoSupport(element)
 
+        cls.__previous_mentor_object = mentor_object
         return mentor_object
 
     @classmethod
@@ -227,11 +257,9 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object_list.append(Span(child, parent))
                 continue
             if child.name == 'text:list-item' and cls.has_string(child):    ## list-items
-                #print("ppaapappapa >>", parent)
                 mentor_object_list.append(List.Item(child, parent))
                 continue
             if child.name == 'text:list' and cls.has_string(child):    ## list
-                #print(">>>>>> ", parent, " <<<<< ", parent.parent)
                 mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
 
@@ -392,6 +420,19 @@ class Paragraph(Content):
         """
         self.element = element
         Content.__init__(self, PARAGRAPH_TYPE, element, parent)
+
+        return
+
+class ListParagraph(Content):
+    """
+    Inner paragraph to lists model
+    """
+    def __init__(self, element, parent=None):
+        """
+        element: xml element
+        """
+        self.element = element
+        Content.__init__(self, LIST_PARAGRAPH_TYPE, element, parent)
 
         return
 
