@@ -146,6 +146,8 @@ def main(filename: 'odt file to convert',
 
         try:
             mentor_object = processor.process_element(child)
+            if mentor_object is None:
+                continue
             if isinstance(mentor_object, mentor.Chapter):
                 chapters.append(mentor_object)
                 footnotes.append([])

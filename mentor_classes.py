@@ -189,8 +189,8 @@ class ElementProcessor(metaclass=Singleton):
         else:
             return False
         
-        print("MARGin1:", margin_left_previous)
-        print("MARGin2:", margin_left_current)
+        #print("MARGin1:", margin_left_previous)
+        #print("MARGin2:", margin_left_current)
 
         if abs(float(margin_left_previous)-float(margin_left_current)) < 0.05:
             return True
@@ -209,7 +209,7 @@ class ElementProcessor(metaclass=Singleton):
         """
         Return the type list for a style and a level
         """
-        print(style, "   ", lvl)
+        #print(style, "   ", lvl)
         try:
             return cls.__list_style_list[style][lvl]['kind']
         except KeyError: # by default bullet type
@@ -280,10 +280,15 @@ class ElementProcessor(metaclass=Singleton):
          # lists not empty
         elif element.name == 'text:list' and cls.has_string(element):
             mentor_object = List(element)
+        
+        elif element.name == 'text:p':
+            mentor_object = None
         else:
             mentor_object = NoSupport(element)
 
-        cls.__previous_mentor_object = mentor_object
+        if mentor_object:
+            cls.__previous_mentor_object = mentor_object
+
         return mentor_object
 
     @classmethod
@@ -312,7 +317,6 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object_list.append(List.Item(child, parent))
                 continue
             if child.name == 'text:list' and cls.has_string(child):    ## list
-                print("lista interna", parent)
                 mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
 
@@ -525,7 +529,8 @@ class List(Content):
 
         # sublist  
         if len(self.inner_objects) == 1:
-            if len(self.inner_objects[0].inner_objects) == 1 and self.inner_objects[0].inner_objects[0].type == LIST_TYPE:
+            if len(self.inner_objects[0].inner_objects) == 1 and \
+               self.inner_objects[0].inner_objects[0].type == LIST_TYPE:
                 self.inner_objects.append(self.inner_objects[0].inner_objects[0])
                 del self.inner_objects[0]
         return
