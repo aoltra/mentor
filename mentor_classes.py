@@ -27,6 +27,7 @@ SPAN_TYPE = 6
 LIST_TYPE = 7
 LIST_ITEM_TYPE = 8
 LIST_PARAGRAPH_TYPE = 9
+LINK_TYPE = 10
 
 # styles
 STYLE_NAMES = {
@@ -319,6 +320,10 @@ class ElementProcessor(metaclass=Singleton):
             if child.name == 'text:list' and cls.has_string(child):    ## list
                 mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
+            if child.name == 'text:a' and cls.has_string(child):    ## link
+                print(parent, parent.element)
+                mentor_object_list.append(Link(child, parent))
+                continue
 
             if child.string: ## if is not any of the previous types
                 mentor_object_list.append(Text(child.string))
@@ -592,12 +597,24 @@ class Text(Content):
     def __init__(self, string, parent=None):
         """
         string: body text
+        parent: parent object
         """
         Content.__init__(self, TEXT_TYPE, None, parent)
         self.string = string
 
         return
 
+class Link(Content):
+    """
+    URL reference
+    """
+    def __init__(self, element, parent=None):
+        """
+        parent: parent object
+        """
+        Content.__init__(self, LINK_TYPE, element, parent)
+        self.link = element['xlink:href']
+        return
 
 class Span(Content):
     """
@@ -609,7 +626,6 @@ class Span(Content):
         """
         Content.__init__(self, SPAN_TYPE, element, parent)
         return
-
 
 class Footnote(Content):
     """
