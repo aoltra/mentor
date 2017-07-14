@@ -83,6 +83,9 @@ class ElementProcessor(metaclass=Singleton):
             if paragraph_properties and paragraph_properties.has_attr('fo:margin-left'):
                 style_data['margin-left'] = paragraph_properties['fo:margin-left']
 
+            cls.__general_style_list[style.get('style:name')] = style_data
+
+            # print("GEN",style.get('style:name'), cls.__general_style_list[style.get('style:name')])
         return
 
     @classmethod
@@ -109,8 +112,9 @@ class ElementProcessor(metaclass=Singleton):
                 child_l3 = child.findChild().findChild()
                 style_data['margin-left'] = child_l3['fo:margin-left']
 
+                cls.__list_style_list[style['style:name']][level] = style_data
 
-            cls.__list_style_list[style['style:name']][level] = style_data
+            # print(style['style:name'], level, cls.__list_style_list[style['style:name']][level])
 
         return
 
@@ -133,6 +137,7 @@ class ElementProcessor(metaclass=Singleton):
 
     @classmethod
     def has_string(cls, tag):
+        
         """
         Return true if the tag has a string. It works in recursive way
         It is a static method because don't needs the object (self)
@@ -143,6 +148,53 @@ class ElementProcessor(metaclass=Singleton):
             elif cls.has_string(child) is True:
                 return True
 
+        return False
+
+    @classmethod
+    def is_list_paragraph(cls, element):
+        if cls.__previous_mentor_object is None:
+            return False
+
+        if isinstance(cls.__previous_mentor_object, Content) == False:
+            return False
+    
+        # TODO que pasa con los remarks y con text_body?? Si se hace bine la gestion se deberia de poder
+        # quitar los if internos
+        ## previous
+        if cls.__previous_mentor_object.type == LIST_TYPE:
+            #print("LIST:", cls.__previous_mentor_object.element_style)
+            #print("Level1:", cls.__previous_mentor_object.level)
+            if cls.__previous_mentor_object.element_style not in cls.__list_style_list:
+                return False
+            margin_left_previous = cls.__list_style_list[cls.__previous_mentor_object.element_style][cls.__previous_mentor_object.level]
+        elif cls.__previous_mentor_object.type == LIST_PARAGRAPH_TYPE:
+            if cls.__previous_mentor_object.element_style not in cls.__general_style_list:
+                return False
+            margin_left_previous = cls.__general_style_list[cls.__previous_mentor_object.element_style]
+        else:
+            return False
+
+        if 'margin-left' in margin_left_previous:
+            margin_left_previous = margin_left_previous['margin-left'][:-2]
+        else:
+            return False
+
+        ## current
+        if element.get('text:style-name') not in cls.__general_style_list:
+                return False
+
+        margin_left_current = cls.__general_style_list[element.get('text:style-name')]
+        if 'margin-left' in margin_left_current:
+            margin_left_current=margin_left_current['margin-left'][:-2]
+        else:
+            return False
+        
+        print("MARGin1:", margin_left_previous)
+        print("MARGin2:", margin_left_current)
+
+        if abs(float(margin_left_previous)-float(margin_left_current)) < 0.05:
+            return True
+    
         return False
 
     @classmethod
@@ -159,7 +211,7 @@ class ElementProcessor(metaclass=Singleton):
         """
         print(style, "   ", lvl)
         try:
-            return cls.__list_style_list[style][lvl]
+            return cls.__list_style_list[style][lvl]['kind']
         except KeyError: # by default bullet type
             return List.TYPE_BULLET
 
@@ -220,7 +272,7 @@ class ElementProcessor(metaclass=Singleton):
             # check the type of paragraph
             if Remark.remark_category(element) > 0:
                 mentor_object = Remark(element)     ## Remarks
-            elif cls.__previous_mentor_object and isinstance(cls.__previous_mentor_object, Content) and cls.__previous_mentor_object.type == LIST_TYPE:
+            elif cls.is_list_paragraph(element):
                 mentor_object = ListParagraph(element)  ## Inner paragraph list
             else:
                 mentor_object = Paragraph(element)  ## Paragraphs
