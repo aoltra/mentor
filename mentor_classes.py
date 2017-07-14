@@ -312,6 +312,7 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object_list.append(List.Item(child, parent))
                 continue
             if child.name == 'text:list' and cls.has_string(child):    ## list
+                print("lista interna", parent)
                 mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
 
@@ -521,6 +522,12 @@ class List(Content):
             style = parent.element_style
         Content.__init__(self, LIST_TYPE, element, parent, style)
         self.kind = ElementProcessor.get_type_list(self.element_style, self.level)
+
+        # sublist  
+        if len(self.inner_objects) == 1:
+            if len(self.inner_objects[0].inner_objects) == 1 and self.inner_objects[0].inner_objects[0].type == LIST_TYPE:
+                self.inner_objects.append(self.inner_objects[0].inner_objects[0])
+                del self.inner_objects[0]
         return
 
     def __str__(self):
