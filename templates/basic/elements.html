@@ -3,9 +3,7 @@
         <py:choose>
              <!-- paragraph -->
             <py:when test="obj.type == 1">
-                <p>
-                    ${render_elements(obj.inner_objects)}
-                </p>
+                <p>${render_elements(obj.inner_objects)}</p>
             </py:when>
             <py:when test="obj.type == 4">
                 ${obj.string}
@@ -14,15 +12,31 @@
                 <a class="footnote-citation">${obj.citation}</a> 
             </py:when>
             <py:when test="obj.type == 6">
-                <!-- <py:for each="element in element.elements">
-                    <xi:include href="element.html" />
-                </py:for>  -->
                 ${render_elements(obj.inner_objects)}
+            </py:when>
+            <!-- list -->
+            <py:when test="obj.type == 7">
+                <py:if test="obj.kind == 1">
+                    <ul>
+                    ${render_elements(obj.inner_objects)}
+                    </ul>
+                </py:if>
+                <py:if test="obj.kind == 2">
+                    <ol>
+                    ${render_elements(obj.inner_objects)}
+                    </ol>
+                </py:if>
             </py:when>
              <py:when test="obj.type == 8">
                 <li>
                 ${render_elements(obj.inner_objects)}
                 </li>
+            </py:when>
+            <py:when test="obj.type == 10">
+                <a href="${obj.link}">${render_elements(obj.inner_objects)}</a>
+            </py:when>
+            <py:when test="obj.type == 11">
+                <a name="${obj.name}">${render_elements(obj.inner_objects)}</a>
             </py:when>
             <py:otherwise>
                 <span class="mentor-notsupported-span">ELEMENTO NO SOPORTADO</span>

@@ -28,6 +28,7 @@ LIST_TYPE = 7
 LIST_ITEM_TYPE = 8
 LIST_PARAGRAPH_TYPE = 9
 LINK_TYPE = 10
+MARKER_TYPE = 11
 
 # styles
 STYLE_NAMES = {
@@ -321,8 +322,11 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object_list.append(List(child, parent, parent.parent.level+1))
                 continue
             if child.name == 'text:a' and cls.has_string(child):    ## link
-                print(parent, parent.element)
                 mentor_object_list.append(Link(child, parent))
+                continue
+            if child.name == 'text:bookmark-start' or child.name == 'text:bookmark':
+                print(parent, parent.element)
+                mentor_object_list.append(Bookmark(child, parent))
                 continue
 
             if child.string: ## if is not any of the previous types
@@ -614,6 +618,18 @@ class Link(Content):
         """
         Content.__init__(self, LINK_TYPE, element, parent)
         self.link = element['xlink:href']
+        return
+
+class Bookmark(Content):
+    """
+    Bookmark model
+    """
+    def __init__(self, element, parent=None):
+        """
+        parent: parent object
+        """
+        Content.__init__(self, MARKER_TYPE, element, parent)
+        self.name = element['text:name']
         return
 
 class Span(Content):
