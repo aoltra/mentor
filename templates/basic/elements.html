@@ -1,21 +1,22 @@
+<?python
+import mentor_type_objects as MT
+?>
 <div xmlns:py="http://genshi.edgewall.org/" py:def="render_elements(input)" py:strip="">
     <div py:for="obj in input" py:strip="">
         <py:choose>
-             <!-- paragraph -->
-            <py:when test="obj.type == 1">
+            <py:when test="obj.type == MT.PARAGRAPH_TYPE">
                 <p>${render_elements(obj.inner_objects)}</p>
             </py:when>
-            <py:when test="obj.type == 4">
+            <py:when test="obj.type == MT.TEXT_TYPE">
                 ${obj.string}
             </py:when>
-            <py:when test="obj.type == 3">
+            <py:when test="obj.type == MT.FOOTNOTE_TYPE">
                 <a class="footnote-citation">${obj.citation}</a> 
             </py:when>
-            <py:when test="obj.type == 6">
+            <py:when test="obj.type == MT.SPAN_TYPE">
                 ${render_elements(obj.inner_objects)}
             </py:when>
-            <!-- list -->
-            <py:when test="obj.type == 7">
+            <py:when test="obj.type == MT.LIST_TYPE">
                 <py:if test="obj.kind == 1">
                     <ul>
                     ${render_elements(obj.inner_objects)}
@@ -27,15 +28,15 @@
                     </ol>
                 </py:if>
             </py:when>
-             <py:when test="obj.type == 8">
+             <py:when test="obj.type == MT.LIST_ITEM_TYPE">
                 <li>
                 ${render_elements(obj.inner_objects)}
                 </li>
             </py:when>
-            <py:when test="obj.type == 10">
+            <py:when test="obj.type == MT.LINK_TYPE">
                 <a href="${obj.link}">${render_elements(obj.inner_objects)}</a>
             </py:when>
-            <py:when test="obj.type == 11">
+            <py:when test="obj.type == MT.MARKER_TYPE">
                 <a name="${obj.name}">${render_elements(obj.inner_objects)}</a>
             </py:when>
             <py:otherwise>

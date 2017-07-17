@@ -17,7 +17,11 @@ import plac
 
 import Uhuru.os_utilities as UH_OSU
 import Uhuru.cli_utilities as UH_CLIU
-import mentor_classes as mentor
+
+import element_processor as ep
+from mo_block import *
+from mo_inline import *
+from mo_general import *
 
 # global variables
 REMARKS_STYLE_NAME_ES = 'MT_20_Observaciones_20_'
@@ -34,20 +38,6 @@ def unzip_odt(odt_file):
     zip_ref.close()
     return directory_to_extract
 
-
-def create_styles_for_level(style_element, level_number, style_list):
-    """
-    Create a list of heading styles
-    """
-    style_name = style_element + str(level_number)
-
-    styles = list((style['style:name'] for style in style_list
-                   if style.get('style:parent-style-name') == style_name))
-
-    styles.append(style_name)
-
-    return styles
-
 def get_level_number(level_style, styles):
     """
     Return the heading level of the style
@@ -58,16 +48,6 @@ def get_level_number(level_style, styles):
         exit(-3)
 
     return int(level_number[0])
-
-def get_string_from_tag(tag):
-    """
-    Get the string of the tag, joining the strings of its children
-    """
-    string = ""
-    for child in tag.children:
-        if child.string:
-            string += str(child.string)
-    return string
 
 def process_remarks(paragraphs):
     """
@@ -126,7 +106,7 @@ def main(filename: 'odt file to convert',
     # get styles
     style_list = doc.findAll('style:style')
     list_style_list = doc.findAll('text:list-style')
-    processor = mentor.ElementProcessor(directory_target, style_list, list_style_list)
+    processor = ep.ElementProcessor(directory_target, style_list, list_style_list)
 
     # only styles which style:parent-style-name is Heading_20_X where X is in [1..10]
     #style_list = doc.findAll('style:style')
@@ -140,7 +120,7 @@ def main(filename: 'odt file to convert',
 
     for child in office_text.children:
         if not body_text and (child.name != "text:h" or
-                              not mentor.ElementProcessor.has_string(child)):
+                              not ep.ElementProcessor.has_string(child)):
             continue
         body_text = True
 
@@ -148,14 +128,14 @@ def main(filename: 'odt file to convert',
             mentor_object = processor.process_element(child)
             if mentor_object is None:
                 continue
-            if isinstance(mentor_object, mentor.Chapter):
+            if isinstance(mentor_object, Chapter):
                 chapters.append(mentor_object)
                 processor.set_current_chpater(len(chapters))
                 footnotes.append([])
             else:
                 chapters[-1].inner_objects.append(mentor_object)
                 footnotes_objects = processor.get_inner_mentor_objects_by_type(
-                    mentor_object, mentor.Footnote)
+                    mentor_object, Footnote)
                 footnotes[-1].extend([foot for foot in footnotes_objects if foot != []])
         except IndexError:
             print("\nError 2: It is not possible to assign the element to a block.",

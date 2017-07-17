@@ -1,7 +1,8 @@
 #/usr/bin/python3
 
 """
-Helper classes for mentor
+Element processor for mentor
+Receives xml elements and return mentor objects
 """
 #
 # Author: Alfredo Oltra
@@ -9,32 +10,12 @@ Helper classes for mentor
 #
 # License GPL-3.0
 
-import os
+from mentor_type_objects import *
+from mo_general import *
+from mo_block import *
+from mo_inline import *
 
-from mentor import get_string_from_tag
 from Uhuru.data_utilities import Singleton
-
-# global variables
-# type elements
-NOSUPPORTED_TYPE = -1
-HEADING_TYPE = 0
-PARAGRAPH_TYPE = 1
-REMARK_TYPE = 2
-FOOTNOTE_TYPE = 3
-TEXT_TYPE = 4
-FOOTNOTE_BODY_TYPE = 5
-SPAN_TYPE = 6
-LIST_TYPE = 7
-LIST_ITEM_TYPE = 8
-LIST_PARAGRAPH_TYPE = 9
-LINK_TYPE = 10
-MARKER_TYPE = 11
-
-# styles
-STYLE_NAMES = {
-    HEADING_TYPE: ['Heading_20_'],
-    REMARK_TYPE:  ['MT_20_Observaciones_20_', 'MT_20_Remarks_20_']
-    }
 
 class ElementProcessor(metaclass=Singleton):
     """
@@ -86,15 +67,12 @@ class ElementProcessor(metaclass=Singleton):
 
     @classmethod
     def add_marker(cls, marker):
-        print(">>!",marker)
         cls.__markers.append(marker)
         return
 
     @classmethod
     def get_chapter_marker(cls, name):
-        print(cls.__markers)
         for mark in cls.__markers:
-            print(mark.name)
             if mark.name == name:
                 return mark.chapter
 
@@ -118,7 +96,6 @@ class ElementProcessor(metaclass=Singleton):
 
             cls.__general_style_list[style.get('style:name')] = style_data
 
-            # print("GEN",style.get('style:name'), cls.__general_style_list[style.get('style:name')])
         return
 
     @classmethod
@@ -170,7 +147,6 @@ class ElementProcessor(metaclass=Singleton):
 
     @classmethod
     def has_string(cls, tag):
-        
         """
         Return true if the tag has a string. It works in recursive way
         It is a static method because don't needs the object (self)
@@ -182,6 +158,17 @@ class ElementProcessor(metaclass=Singleton):
                 return True
 
         return False
+
+    @staticmethod
+    def get_string_from_tag(tag):
+        """
+        Get the string of the tag (XML element), joining the strings of its children
+        """
+        string = ""
+        for child in tag.children:
+            if child.string:
+                string += str(child.string)
+        return string
 
     @classmethod
     def is_list_paragraph(cls, element):
@@ -222,9 +209,6 @@ class ElementProcessor(metaclass=Singleton):
         else:
             return False
         
-        #print("MARGin1:", margin_left_previous)
-        #print("MARGin2:", margin_left_current)
-
         if abs(float(margin_left_previous)-float(margin_left_current)) < 0.05:
             return True
     
@@ -242,7 +226,6 @@ class ElementProcessor(metaclass=Singleton):
         """
         Return the type list for a style and a level
         """
-        #print(style, "   ", lvl)
         try:
             return cls.__list_style_list[style][lvl]['kind']
         except KeyError: # by default bullet type
@@ -356,7 +339,6 @@ class ElementProcessor(metaclass=Singleton):
                 mentor_object_list.append(Link(child, parent))
                 continue
             if child.name == 'text:bookmark-start' or child.name == 'text:bookmark':
-                print(parent, parent.element)
                 mentor_object_list.append(Bookmark(child, parent))
                 continue
 
@@ -409,347 +391,3 @@ class ElementProcessor(metaclass=Singleton):
                     
         return
 
-class Chapter(object):
-    """
-    Chapter class implementation
-    """
-    number = 0
-
-    def __init__(self, element):
-        Chapter.number += 1
-        self.number = Chapter.number
-        self.element = element
-        self.inner_objects = []
-
-        os.makedirs(ElementProcessor.get_directory_target() + "/l1_" + str(self.number))
-
-    def get_string(self):
-        """
-        Get the string of the block
-        """
-        return get_string_from_tag(self.element)
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "Number:" + str(Chapter.number) + "\nBlock:" + str(self.element) + \
-               "\nSections:\n" + str(self.inner_objects)
-
-class Content(object):
-    """
-    General content. Parent class of the different types of Content
-    """
-    def __init__(self, ty, element, parent=None, style=None):
-        """
-        type: type of content.
-        """
-        self.type = ty
-        self.parent = parent
-
-        if style is None and element != None:
-            self.element_style = element.get('text:style-name')
-        else:
-            self.element_style = style
-
-        self.inner_objects = ElementProcessor.get_inner_mentor_objects(element, self)
-
-
-    def get_raw_text(self):
-        """
-        Return the raw text of the content
-        """
-        return Content.__get_inner_text(self)
-
-    @staticmethod
-    def is_style(element, style_type):
-        """
-        Returns true if the element style is one of the style_type
-        element: element to study
-        style_type: style type, ie, HEADING_TYPE, PARAGRAPH_TYPE...
-        """
-        style_element = element.get('text:style-name')
-        for style in STYLE_NAMES[style_type]:
-            if style_element.startswith(style):
-                # if style ends with space the style_element have to end with a nunber
-                if style.endswith('_20_') and style == style_element:
-                    return False
-
-                return True
-
-        return False
-
-    @classmethod
-    def __get_inner_text(cls, mentor_object):
-        """
-        Private function
-        Return a string with the text of all inner objects of a mentor_objects
-        mentor_object: mentor object
-        """
-        string = ""
-        for obj in mentor_object.inner_objects:
-            if isinstance(obj, Text):
-                string += str(obj.string)
-            else:
-                string += cls.__get_inner_text(obj)
-
-        return string
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "Type:" + str(self.type)
-
-
-####################
-## BLOCK ELEMENTS ##
-####################
-
-class Heading(Content):
-    """
-    Internal heading model
-    """
-    def __init__(self, element, parent=None):
-        """
-        level: heading level
-        string: text body of the paragraph
-        """
-        Content.__init__(self, HEADING_TYPE, element, parent)
-        self.level = ElementProcessor.get_level_number(self.element_style)
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return super().__repr__() + \
-            " Level:" + str(self.level) + "\nBlock:" + str(self.get_raw_text())
-
-
-class Paragraph(Content):
-    """
-    Paragraph model
-    """
-    def __init__(self, element, parent=None):
-        """
-        element: xml element
-        """
-        self.element = element
-        Content.__init__(self, PARAGRAPH_TYPE, element, parent)
-
-        return
-
-class ListParagraph(Content):
-    """
-    Inner paragraph to lists model
-    """
-    def __init__(self, element, parent=None):
-        """
-        element: xml element
-        """
-        self.element = element
-        Content.__init__(self, LIST_PARAGRAPH_TYPE, element, parent)
-
-        return
-
-class List(Content):
-    """
-    List model
-    """
-    TYPE_NOT_ASSIGNED = 0
-    TYPE_BULLET = 1
-    TYPE_NUMBER = 2
-
-    class Item(Content):
-        """
-        List Item model
-        """
-        def __init__(self, element, parent):
-            #print("PPPAAA > ", parent)
-            Content.__init__(self, LIST_ITEM_TYPE, element, parent, parent.element_style)
-            return
-
-        def __str__(self):
-            return self.__repr__()
-
-        def __repr__(self):
-            return "List.Item -> " + super().__repr__() + "\n" +\
-                   "              Parent:" + str(self.parent)
-
-    def __init__(self, element, parent=None, level=1):
-        self.level = level
-        self.kind = List.TYPE_NOT_ASSIGNED
-        if parent is None:
-            style = None
-        else:
-            style = parent.element_style
-        Content.__init__(self, LIST_TYPE, element, parent, style)
-        self.kind = ElementProcessor.get_type_list(self.element_style, self.level)
-
-        # sublist  
-        if len(self.inner_objects) == 1:
-            if len(self.inner_objects[0].inner_objects) == 1 and \
-               self.inner_objects[0].inner_objects[0].type == LIST_TYPE:
-                self.inner_objects.append(self.inner_objects[0].inner_objects[0])
-                del self.inner_objects[0]
-        return
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "List -> " + super().__repr__() + "\n" +\
-               "         Level:" + str(self.level) + "\n" +\
-               "         Kind: " + str(self.kind)
-
-class Remark(Content):
-    """
-    Remark element model
-    """
-    def __init__(self, element, parent=None, category=0):
-        """
-        element: xml element
-        category: type of remarks 1..3
-        """
-        self.category = category
-
-        Content.__init__(self, REMARK_TYPE, element, parent)
-
-        if category != 0:
-            self.category = self.remark_category(element)
-
-#        self.paragraphs = []
-#        for paragraph in paragraphs:
-#            self.paragraphs.append(Paragraph(paragraph.string))
-
-        return
-
-    @staticmethod
-    def remark_category(element):
-        """
-        Return the category of the Remark if the paragraph is a Remark (number greater than 0).
-        Otherwise return 0
-        """
-        category = 0
-        element_style = element.get('text:style-name')
-        if Content.is_style(element, REMARK_TYPE):
-            category = int(element_style[element_style.rfind('_')+1:])
-
-        return category
-
-
-
-#####################
-## INLINE ELEMENTS ##
-#####################
-
-# pylint: disable=too-few-public-methods
-class Text(Content):
-    """
-    Simple text model
-    """
-    def __init__(self, string, parent=None):
-        """
-        string: body text
-        parent: parent object
-        """
-        Content.__init__(self, TEXT_TYPE, None, parent)
-        self.string = string
-
-        return
-
-class Link(Content):
-    """
-    URL reference
-    """
-    def __init__(self, element, parent=None):
-        """
-        parent: parent object
-        """
-        Content.__init__(self, LINK_TYPE, element, parent)
-        self.chapter = ElementProcessor.get_current_chapter()
-        
-        
-        # if element['xlink:href'][0] == '#':  # internal link
-        #   chapter = ElementProcessor.get_chapter_marker(element['xlink:href'])
-        #  if chapter != ElementProcessor.get_current_chapter():
-        #     prefix = "../l1_" + str(chapter) + "/Chapter.html" 
-        self.link = element['xlink:href']
-
-        
-        return
-
-class Bookmark(Content):
-    """
-    Bookmark model
-    """
-    def __init__(self, element, parent=None):
-        """
-        parent: parent object
-        """
-        print("adinedo")
-        Content.__init__(self, MARKER_TYPE, element, parent)
-        self.chapter = ElementProcessor.get_current_chapter()
-        self.name = element['text:name']
-        
-        ElementProcessor.add_marker(self)
-        return
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "Bookmark -> " + super().__repr__() + "\n" +\
-               "              Parent:" + str(self.parent) + "\n" +\
-               "              name: " + self.name + "\n" +\
-               "              chapter: " + str(self.chapter)
-
-class Span(Content):
-    """
-    Span element model
-    """
-    def __init__(self, element, parent=None):
-        """
-        element: span xml element
-        """
-        Content.__init__(self, SPAN_TYPE, element, parent)
-        return
-
-class Footnote(Content):
-    """
-    Footnote model
-    """
-    class Body(Content):
-        """
-        Body content of footnote
-        """
-        def __init__(self, element, parent=None):
-            Content.__init__(self, FOOTNOTE_BODY_TYPE, element, parent)
-            return
-
-    def __init__(self, element, parent=None):
-        Content.__init__(self, FOOTNOTE_TYPE, element)
-        self.__get_note_components(element)
-        return
-
-    def __get_note_components(self, element):
-        """
-        Get the elements values for Footnote
-        """
-        for child in element.children:
-            if child.name == 'text:note-citation':
-                self.citation = child.string
-            if child.name == 'text:note-body':
-                self.body = Footnote.Body(child)
-
-# pylint: disable=too-few-public-methods
-class NoSupport(Content):
-    """
-    Elements no supported
-    """
-    def __init__(self, element, parent=None):
-        Content.__init__(self, NOSUPPORTED_TYPE, None, parent)
-        return
-
-    def __str__(self):
-        return "NOT SUPPORTED"

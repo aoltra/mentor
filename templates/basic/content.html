@@ -1,20 +1,21 @@
 <?python
 import templates.basic.python.mentor_genshi_functions as MGF
+import mentor_type_objects as MT
 ?>
 <div xmlns:py="http://genshi.edgewall.org/" 
      xmlns:xi="http://www.w3.org/2001/XInclude" py:strip="">
     <xi:include href="elements.html" />
     <div py:for="obj in content" py:strip="">
         <py:choose>
-            <py:when test="obj.type == -1">
+            <py:when test="obj.type == MT.NOSUPPORTED_TYPE">
                 <p class="mentor-notsupported">ELEMENTO NO SOPORTADO</p>
             </py:when>
             <!-- headers -->
-            <py:when test="obj.type == 0">
+            <py:when test="obj.type == MT.HEADING_TYPE">
                 ${MGF.create_headers_html(obj.level,obj.get_raw_text())}
             </py:when>
             <!-- paragraph -->
-            <py:when test="obj.type == 1">
+            <py:when test="obj.type == MT.PARAGRAPH_TYPE">
                 <p>
                     <!-- <py:for each="element in con.elements">
                     <xi:include href="element.html" />
@@ -22,8 +23,13 @@ import templates.basic.python.mentor_genshi_functions as MGF
                     ${render_elements(obj.inner_objects)}
                 </p>
             </py:when>
+            <py:when test="obj.type == MT.LIST_PARAGRAPH_TYPE">
+                <p class="inner-paragraph-list">
+                    ${render_elements(obj.inner_objects)}
+                </p>
+            </py:when>
             <!-- list -->
-            <py:when test="obj.type == 7">
+            <py:when test="obj.type == MT.LIST_TYPE">
                 <py:if test="obj.kind == 1">
                     <ul>
                     ${render_elements(obj.inner_objects)}
@@ -36,7 +42,7 @@ import templates.basic.python.mentor_genshi_functions as MGF
                 </py:if>
             </py:when>
             <!-- remarks -->
-            <py:when test="obj.type == 2">
+            <py:when test="obj.type == MT.REMARK_TYPE">
                 <div class="remarks ${MGF.remark_category_class(obj.category)}">
                 <!--    <p py:for="element in con.elements">${element.string}</p> -->
                 </div>
