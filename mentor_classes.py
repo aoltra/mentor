@@ -47,6 +47,10 @@ class ElementProcessor(metaclass=Singleton):
     __previous_mentor_object = None
     __directory_target = ""
 
+    __current_chapter = 0
+
+    __markers = []
+
     def __init__(self, directory_target=None, style_list=None,
                  list_style_list=None):
         """
@@ -67,8 +71,35 @@ class ElementProcessor(metaclass=Singleton):
 
         ElementProcessor.__create_list_style_for_level(list_style_list)
         ElementProcessor.__create_general_styles(style_list)
+        ElementProcessor.__current_chapter = 0
 
         return
+
+    @classmethod
+    def get_current_chapter(cls):
+        return cls.__current_chapter
+
+    @classmethod
+    def set_current_chpater(cls, chapter):
+        cls.__current_chapter = chapter
+        return
+
+    @classmethod
+    def add_marker(cls, marker):
+        print(">>!",marker)
+        cls.__markers.append(marker)
+        return
+
+    @classmethod
+    def get_chapter_marker(cls, name):
+        print(cls.__markers)
+        for mark in cls.__markers:
+            print(mark.name)
+            if mark.name == name:
+                return mark.chapter
+
+        print("Error 4: Marker chapter (",name,") not found.")
+        exit(-4)    
 
     @classmethod
     def __create_general_styles(cls, style_list):
@@ -160,7 +191,7 @@ class ElementProcessor(metaclass=Singleton):
         if isinstance(cls.__previous_mentor_object, Content) == False:
             return False
     
-        # TODO que pasa con los remarks y con text_body?? Si se hace bine la gestion se deberia de poder
+        # TODO que pasa con los remarks y con text_body?? Si se hace bien la gestion se deberia de poder
         # quitar los if internos
         ## previous
         if cls.__previous_mentor_object.type == LIST_TYPE:
@@ -183,7 +214,7 @@ class ElementProcessor(metaclass=Singleton):
 
         ## current
         if element.get('text:style-name') not in cls.__general_style_list:
-                return False
+            return False
 
         margin_left_current = cls.__general_style_list[element.get('text:style-name')]
         if 'margin-left' in margin_left_current:
@@ -294,7 +325,7 @@ class ElementProcessor(metaclass=Singleton):
         return mentor_object
 
     @classmethod
-    def get_inner_mentor_objects(cls, element, parent=None):
+    def get_inner_mentor_objects(cls, element, parent=None): 
         """
         Return a list of children elements of content.
         element: xml element
@@ -357,7 +388,26 @@ class ElementProcessor(metaclass=Singleton):
             mentor_object_list.extend([obj for obj in inner_objects if obj != []])
 
         return mentor_object_list
-
+    
+    @classmethod
+    def finalize(cls, chapters):
+        """
+        Method to finalize the process
+        """
+        def change_link(io):
+            if io.type == LINK_TYPE:
+                if io.link[0] == '#':  # internal link
+                    chapter = cls.get_chapter_marker(io.link[1:])
+                    if io.chapter != chapter:
+                        io.link = "../l1_" + str(chapter) + "/Chapter.html" + io.link
+            for ioi in io.inner_objects:
+                change_link(ioi)
+        # update links
+        for mo in chapters:
+            for io in mo.inner_objects:
+                change_link(io)       
+                    
+        return
 
 class Chapter(object):
     """
@@ -617,7 +667,16 @@ class Link(Content):
         parent: parent object
         """
         Content.__init__(self, LINK_TYPE, element, parent)
+        self.chapter = ElementProcessor.get_current_chapter()
+        
+        
+        # if element['xlink:href'][0] == '#':  # internal link
+        #   chapter = ElementProcessor.get_chapter_marker(element['xlink:href'])
+        #  if chapter != ElementProcessor.get_current_chapter():
+        #     prefix = "../l1_" + str(chapter) + "/Chapter.html" 
         self.link = element['xlink:href']
+
+        
         return
 
 class Bookmark(Content):
@@ -628,9 +687,22 @@ class Bookmark(Content):
         """
         parent: parent object
         """
+        print("adinedo")
         Content.__init__(self, MARKER_TYPE, element, parent)
+        self.chapter = ElementProcessor.get_current_chapter()
         self.name = element['text:name']
+        
+        ElementProcessor.add_marker(self)
         return
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "Bookmark -> " + super().__repr__() + "\n" +\
+               "              Parent:" + str(self.parent) + "\n" +\
+               "              name: " + self.name + "\n" +\
+               "              chapter: " + str(self.chapter)
 
 class Span(Content):
     """

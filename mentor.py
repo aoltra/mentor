@@ -150,6 +150,7 @@ def main(filename: 'odt file to convert',
                 continue
             if isinstance(mentor_object, mentor.Chapter):
                 chapters.append(mentor_object)
+                processor.set_current_chpater(len(chapters))
                 footnotes.append([])
             else:
                 chapters[-1].inner_objects.append(mentor_object)
@@ -161,6 +162,10 @@ def main(filename: 'odt file to convert',
                   "In the document there must be at least one Heading 1 and",
                   "has to be above the rest of the content.")
             exit(-2)
+
+
+    # finish mentor objects
+    processor.finalize(chapters)
 
     # generating level 1 blocks: chapters
     loader = TemplateLoader(os.path.join(os.path.dirname(__file__), 'templates/basic'),
