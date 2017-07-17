@@ -10,8 +10,18 @@ Formato de numeración de versiones: X.Yt.Z
 ## [0.1a]
 ### Añadido
 
-- Generación de capítulos
-- Exportación de párrafos en texto crudo (sin estilos internos)
-- Exportación de cabeceras (sin estilos internos)
-- Exportación de notas al pie
-- Plantilla básica con soporte para elementos exportados
+- [Core] Generación de capítulos
+- [Core] Exportación de párrafos en texto crudo (sin estilos internos)
+- [Core] Exportación de cabeceras (sin estilos internos)
+- [Core] Exportación de notas al pie
+- [Template_basic] Plantilla básica con soporte para elementos exportados
+
+## [0.2a]
+### Añadido
+
+- [Core] Soporte para lista ordenadas y desordenadas
+- [Core] Control de párrafos internos a listas
+- [Core] Soporte para enlaces externos
+- [Core] Soporte para enlaces internos
+- [Template_basic] Posibilidad de crear plantillas utilizando constantes de definición de tipos
+

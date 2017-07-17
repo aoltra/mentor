@@ -172,7 +172,7 @@ Las variables y funciones descritas como **.nombre* hacen referencia las propied
 | *.type           |  (v)  | Tipo de contenido | 
 | *.elements       |  (v)  | Lista de elementos xml (EX) hijos | 
 | *.element_style  |  (v)  | Estilo del elemento xml (EX) | 
-| *.get_raw_text() |  (f)  | Devuelve el texto en crudo (sin modificaciones de estilo)  del contenido | 
+| *.get_raw_text() |  (f)  | Devuelve el texto en crudo (sin modificaciones de estilo) del contenido | 
 
 | Tipo 0   | Tipo  | Headings (Encabezados)     |
 | :------- | :---: | :------------------------- | 
@@ -202,6 +202,29 @@ Las variables y funciones descritas como **.nombre* hacen referencia las propied
 | Tipo 6   | Span                     |
 | :------- | :----------------------- | 
 |          | Sin propiedades añadidas |
+
+| Tipo 7      | Tipo  | List  |
+| :---------- | :---: | :-------------------------------------------    |  
+| *.level     |  (v)  | Nivel de profundidad de la lista                | 
+| *.kind      |  (v)  | Tipo de lista: 1 -> desordenada, 2 -> ordenada  | 
+
+| Tipo 8   | List.Item                |
+| :------- | :----------------------- | 
+|          | Sin propiedades añadidas |
+
+| Tipo 9   | ListParagraph (párrafos internos a listas)   |
+| :------- | :----------------------- | 
+|          | Sin propiedades añadidas |
+
+| Tipo 10      | Tipo  | Link (enlace)                                         |
+| :----------- | :---: | :---------------------------------------------        |  
+| *.chapter    |  (v)  | Número del capitulo en el que se encuentra el enlace  | 
+| *.link       |  (v)  | URL del enlace                                        | 
+
+| Tipo 11      | Tipo  | Bookmark (marcador para enlaces internos)              |
+| :----------- | :---: | :----------------------------------------------------- |  
+| *.chapter    |  (v)  | Número del capítulo en el que se encuentra el marcador | 
+| *.name       |  (v)  | Nombre el marcador                                     |
 
 
 ## Documentos odt antiguos
