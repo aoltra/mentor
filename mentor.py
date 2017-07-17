@@ -19,13 +19,13 @@ import Uhuru.os_utilities as UH_OSU
 import Uhuru.cli_utilities as UH_CLIU
 
 import element_processor as ep
-from mo_block import *
-from mo_inline import *
-from mo_general import *
+from mo_general import Chapter
+from mo_inline import Footnote
 
 # global variables
 REMARKS_STYLE_NAME_ES = 'MT_20_Observaciones_20_'
 REMARKS_STYLE_NAME_EN = 'MT_20_Remarks_20_'
+
 
 def unzip_odt(odt_file):
     """
@@ -38,6 +38,7 @@ def unzip_odt(odt_file):
     zip_ref.close()
     return directory_to_extract
 
+
 def get_level_number(level_style, styles):
     """
     Return the heading level of the style
@@ -48,6 +49,7 @@ def get_level_number(level_style, styles):
         exit(-3)
 
     return int(level_number[0])
+
 
 def process_remarks(paragraphs):
     """
@@ -116,7 +118,6 @@ def main(filename: 'odt file to convert',
     # getting & classifying all the content from the first heading level 1
     office_text = doc.find('office:text')
     body_text = False
-  ###  idx_block = 0
 
     for child in office_text.children:
         if not body_text and (child.name != "text:h" or

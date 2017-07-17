@@ -10,7 +10,7 @@ General Mentor Objects (MO)
 # License GPL-3.0
 
 import os
-from mentor_type_objects import *
+from mentor_type_objects import STYLE_NAMES
 
 import element_processor as ep
 
@@ -110,4 +110,4 @@ class Content(object):
     def __repr__(self):
         return "Type:" + str(self.type)
 
-from mo_inline import *
+from mo_inline import Text

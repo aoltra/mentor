@@ -10,7 +10,7 @@ Menotr Objects type block
 # License GPL-3.0
 
 from mentor_type_objects import *
-from mo_general import *
+from mo_general import Content
 
 import element_processor as ep
 
@@ -97,7 +97,7 @@ class List(Content):
         Content.__init__(self, LIST_TYPE, element, parent, style)
         self.kind = ep.ElementProcessor.get_type_list(self.element_style, self.level)
 
-        # sublist  
+        # sublist
         if len(self.inner_objects) == 1:
             if len(self.inner_objects[0].inner_objects) == 1 and \
                self.inner_objects[0].inner_objects[0].type == LIST_TYPE:
@@ -147,4 +147,3 @@ class Remark(Content):
             category = int(element_style[element_style.rfind('_')+1:])
 
         return category
-
