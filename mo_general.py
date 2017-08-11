@@ -109,5 +109,4 @@ class Content(object):
 
     def __repr__(self):
         return "Type:" + str(self.type)
-
 from mo_inline import Text

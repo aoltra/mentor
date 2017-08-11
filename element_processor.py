@@ -10,10 +10,11 @@ Receives xml elements and return mentor objects
 #
 # License GPL-3.0
 
-from mentor_type_objects import *
-from mo_general import *
-from mo_block import *
-from mo_inline import *
+from mentor_type_objects import LIST_TYPE, LIST_PARAGRAPH_TYPE, HEADING_TYPE, LINK_TYPE
+from mo_general import Content, Chapter, STYLE_NAMES
+from frame_processor import FrameProcessor
+from mo_block import List, Heading, Remark, ListParagraph, Paragraph
+from mo_inline import Span, Link, Footnote, NoSupport, Bookmark, Text
 
 from Uhuru.data_utilities import Singleton
 
@@ -72,12 +73,15 @@ class ElementProcessor(metaclass=Singleton):
 
     @classmethod
     def get_chapter_marker(cls, name):
+        """
+        Returns the chapter where the bookmark target is
+        """
         for mark in cls.__markers:
             if mark.name == name:
                 return mark.chapter
 
-        print("Error 4: Marker chapter (",name,") not found.")
-        exit(-4)    
+        print("Error 4: Marker chapter (", name, ") not found.")
+        exit(-4)
 
     @classmethod
     def __create_general_styles(cls, style_list):
@@ -89,7 +93,7 @@ class ElementProcessor(metaclass=Singleton):
 
         for style in style_list:
             style_data = {}
-   
+
             paragraph_properties = style.findChild('style:paragraph-properties')
             if paragraph_properties and paragraph_properties.has_attr('fo:margin-left'):
                 style_data['margin-left'] = paragraph_properties['fo:margin-left']
@@ -175,22 +179,24 @@ class ElementProcessor(metaclass=Singleton):
         if cls.__previous_mentor_object is None:
             return False
 
-        if isinstance(cls.__previous_mentor_object, Content) == False:
+        if isinstance(cls.__previous_mentor_object, Content) is False:
             return False
-    
-        # TODO que pasa con los remarks y con text_body?? Si se hace bien la gestion se deberia de poder
-        # quitar los if internos
+
+        # TODO que pasa con los remarks y con text_body?? Si se hace bien la gestion se
+        # deberia de poder quitar los if internos
         ## previous
         if cls.__previous_mentor_object.type == LIST_TYPE:
             #print("LIST:", cls.__previous_mentor_object.element_style)
             #print("Level1:", cls.__previous_mentor_object.level)
             if cls.__previous_mentor_object.element_style not in cls.__list_style_list:
                 return False
-            margin_left_previous = cls.__list_style_list[cls.__previous_mentor_object.element_style][cls.__previous_mentor_object.level]
+            margin_left_previous = cls.__list_style_list\
+                    [cls.__previous_mentor_object.element_style][cls.__previous_mentor_object.level]
         elif cls.__previous_mentor_object.type == LIST_PARAGRAPH_TYPE:
             if cls.__previous_mentor_object.element_style not in cls.__general_style_list:
                 return False
-            margin_left_previous = cls.__general_style_list[cls.__previous_mentor_object.element_style]
+            margin_left_previous = cls.__general_style_list\
+                    [cls.__previous_mentor_object.element_style]
         else:
             return False
 
@@ -205,13 +211,13 @@ class ElementProcessor(metaclass=Singleton):
 
         margin_left_current = cls.__general_style_list[element.get('text:style-name')]
         if 'margin-left' in margin_left_current:
-            margin_left_current=margin_left_current['margin-left'][:-2]
+            margin_left_current = margin_left_current['margin-left'][:-2]
         else:
             return False
-        
+
         if abs(float(margin_left_previous)-float(margin_left_current)) < 0.05:
             return True
-    
+
         return False
 
     @classmethod
@@ -296,7 +302,7 @@ class ElementProcessor(metaclass=Singleton):
          # lists not empty
         elif element.name == 'text:list' and cls.has_string(element):
             mentor_object = List(element)
-        
+
         elif element.name == 'text:p':
             mentor_object = None
         else:
@@ -308,7 +314,7 @@ class ElementProcessor(metaclass=Singleton):
         return mentor_object
 
     @classmethod
-    def get_inner_mentor_objects(cls, element, parent=None): 
+    def get_inner_mentor_objects(cls, element, parent=None):
         """
         Return a list of children elements of content.
         element: xml element
@@ -341,6 +347,9 @@ class ElementProcessor(metaclass=Singleton):
             if child.name == 'text:bookmark-start' or child.name == 'text:bookmark':
                 mentor_object_list.append(Bookmark(child, parent))
                 continue
+            if child.name == 'draw:frame':
+                mentor_object_list.append(FrameProcessor.process_frame(child))
+                continue
 
             if child.string: ## if is not any of the previous types
                 mentor_object_list.append(Text(child.string))
@@ -370,7 +379,7 @@ class ElementProcessor(metaclass=Singleton):
             mentor_object_list.extend([obj for obj in inner_objects if obj != []])
 
         return mentor_object_list
-    
+
     @classmethod
     def finalize(cls, chapters):
         """
@@ -387,7 +396,6 @@ class ElementProcessor(metaclass=Singleton):
         # update links
         for mo in chapters:
             for io in mo.inner_objects:
-                change_link(io)       
-                    
-        return
+                change_link(io)
 
+        return

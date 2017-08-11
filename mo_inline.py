@@ -9,8 +9,9 @@ Mentor Objects type inline
 #
 # License GPL-3.0
 
-from mentor_type_objects import *
-from mo_general import *
+from mentor_type_objects import TEXT_TYPE, LINK_TYPE, MARKER_TYPE, SPAN_TYPE, FOOTNOTE_TYPE,\
+                                FOOTNOTE_BODY_TYPE, NOSUPPORTED_TYPE
+from mo_general import Content
 import element_processor as ep
 
 #####################
@@ -43,7 +44,7 @@ class Link(Content):
         Content.__init__(self, LINK_TYPE, element, parent)
         self.chapter = ep.ElementProcessor.get_current_chapter()
         self.link = element['xlink:href']
-        
+
         return
 
 class Bookmark(Content):
@@ -57,7 +58,7 @@ class Bookmark(Content):
         Content.__init__(self, MARKER_TYPE, element, parent)
         self.chapter = ep.ElementProcessor.get_current_chapter()
         self.name = element['text:name']
-        
+
         ep.ElementProcessor.add_marker(self)
         return
 

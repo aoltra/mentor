@@ -1,10 +1,10 @@
 # Changelog
 
-Formato de numeración de versiones: X.Yt.Z
+Formato de numeración de versiones: X.Y-t.Z
 
 * X: versión mayor
 * Y: versión menor
-* t: tipo: a (ALFA), b (BETA), r (RELEASE), rc (RELEASE CANDIDATE)
+* t: tipo: a (ALFA), b (BETA), rc (RELEASE CANDIDATE), r (RELEASE)
 * Z: revisiones, correciones sobre las versión (si no aplica no aparece)
 
 ## [0.1a]

@@ -9,7 +9,8 @@ Menotr Objects type block
 #
 # License GPL-3.0
 
-from mentor_type_objects import *
+from mentor_type_objects import HEADING_TYPE, PARAGRAPH_TYPE, LIST_PARAGRAPH_TYPE, LIST_ITEM_TYPE,\
+                                LIST_TYPE, REMARK_TYPE, IMAGE_TYPE
 from mo_general import Content
 
 import element_processor as ep
@@ -147,3 +148,20 @@ class Remark(Content):
             category = int(element_style[element_style.rfind('_')+1:])
 
         return category
+
+class Image(Content):
+    """
+    Image model
+    """
+    def __init__(self, element, frame):
+        """
+        element: xml element
+        """
+        self.width = frame.width
+        self.height = frame.height
+
+        self.image = element['xlink:href']
+
+        Content.__init__(self, IMAGE_TYPE, element)
+
+        return
